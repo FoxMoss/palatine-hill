@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css" />
+    <!--ssr-head-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <!--ssr-body-->
+    <script type="module" src="/src/main-client.ts"></script>
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="0" width="0">
+      <defs>
+        <filter id="squiggle">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency=".05"
+            numOctaves="4"
+            seed="1"
+            result="noise1"
+          />
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency=".05"
+            numOctaves="4"
+            seed="42"
+            result="noise2"
+          />
+
+          <feComposite
+            in="noise1"
+            in2="noise2"
+            operator="arithmetic"
+            k1="0"
+            k2="1"
+            k3="0"
+            k4="0"
+            result="blended"
+            id="animatecomposite"
+          >
+          </feComposite>
+
+          <feDisplacementMap in="SourceGraphic" in2="blended" scale="4" />
+        </filter>
+        <filter id="squiggle-large">
+          <feTurbulence
+            type="fractalNoise"
+            id="turbulence"
+            baseFrequency=".05"
+            numOctaves="4"
+          />
+          <feDisplacementMap id="displacement" in="SourceGraphic" scale="4" />
+        </filter>
+      </defs>
+    </svg>
+  </body>
+</html>

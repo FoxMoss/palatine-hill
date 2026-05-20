@@ -1,0 +1,28 @@
+{
+  "name": "fox-ysws",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:client": "tsc && vite build --ssrManifest .vite/ssr-manifest.json --outDir dist/static",
+    "build:server": "tsc && vite build --ssr src/main-server.ts --outDir dist/server",
+    "build": "pnpm run build:client && pnpm run build:server && node prerender.js"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^8.0.0"
+  },
+  "dependencies": {
+    "@mdi/js": "^7.4.47",
+    "dompurify": "^3.3.3",
+    "dreamland": "link:../../dreamland/",
+    "highlight.js": "^11.11.1",
+    "isomorphic-dompurify": "^3.3.0",
+    "jsdom": "^29.0.0",
+    "marked": "^17.0.4",
+    "marked-highlight": "^2.2.3",
+    "mermaid": "^11.14.0",
+    "prettier": "^3.8.1"
+  }
+}
