@@ -1,6 +1,7 @@
 import { ComponentInstance, type FC } from "dreamland/core";
 import { Route, Router } from "dreamland/router";
 import mermaid from "mermaid";
+import { Dashboard, Page404, PageCallback, PageGenericError, PageLogin } from "./404";
 
 mermaid.initialize({
   theme: "base",
@@ -42,7 +43,11 @@ function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
       <div id="app">
         <Router initial={this.url ? [this.url, "http://127.0.0.1:5173"] : []}>
           <Route show={() => import("./homepage").then((r) => <r.default />)} />
-          <Route show={() => import("./404").then((r) => <r.default />)} path="404"/>
+          <Route show={() => <Page404/>} path="404"/>
+          <Route show={() => <PageLogin/>} path="auth/login"/>
+          <Route show={() => <PageCallback/>} path="auth/callback"/>
+          <Route show={() => <PageGenericError/>} path="error"/>
+          <Route show={() => <Dashboard/>} path="dashboard"/>
         </Router>
       </div>
       <>

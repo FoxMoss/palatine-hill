@@ -1,6 +1,7 @@
 add_executable(palatine
  main.cpp
  error.cpp
+ dbclient.cpp
 )
 
 
@@ -20,7 +21,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(oatpp-sqlite)
 
-target_link_libraries(palatine oatpp oatpp-sqlite)
+FetchContent_Declare(
+  CURL 
+  URL https://github.com/curl/curl/releases/download/curl-8_18_0/curl-8.18.0.tar.xz
+)
+FetchContent_MakeAvailable(CURL)
+
+FetchContent_Declare(json 
+  URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
+
+target_link_libraries(palatine oatpp oatpp-sqlite libcurl nlohmann_json::nlohmann_json)
 
 add_compile_options(-ggdb)
 

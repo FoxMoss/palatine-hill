@@ -2,7 +2,10 @@
 
 #include <print>
 
+#include "dbclient.h"
 #include "error.h"
+#include "oatpp-sqlite/ConnectionProvider.hpp"
+#include "oatpp-sqlite/Executor.hpp"
 #include "oatpp/json/ObjectMapper.hpp"
 #include "oatpp/macro/component.hpp"
 #include "oatpp/network/tcp/server/ConnectionProvider.hpp"
@@ -48,6 +51,16 @@ class AppComponent {
     connectionHandler->setErrorHandler(
         std::make_shared<ErrorHandler>(contentMappers));
     return connectionHandler;
+  }());
+
+  OATPP_CREATE_COMPONENT(std::shared_ptr<LocalDb>, dbclient)([] {
+    auto connectionProvider =
+        std::make_shared<oatpp::sqlite::ConnectionProvider>("persistent.db");
+
+    auto executor =
+        std::make_shared<oatpp::sqlite::Executor>(connectionProvider);
+
+    return std::make_shared<LocalDb>(executor);
   }());
 };
 

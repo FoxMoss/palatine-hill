@@ -67,3 +67,36 @@ body, html {
 .underline {
   text-decoration-line: underline;
 }
+
+.pagetemplate {
+  .title {
+    width: 300px;
+    margin-bottom: 0;
+    font-size: xxx-large;
+    cursor: pointer;
+  }
+
+  .container {
+    margin-top: 40px;
+
+    color: #5c4e43;
+  }
+  @media screen and (width >= 800px) {
+    .container {
+      margin-left: calc((100vw - 70vw) / 2);
+      margin-right: calc((100vw - 70vw) / 2);
+    }
+  }
+
+  @media screen and (width < 800px) {
+    .paragraph {
+      margin: 10px;
+    }
+  }
+  .border {
+    position: absolute;
+    width: 260px;
+    border: 2px solid #5c4e43;
+    filter: url(#squiggle);
+  }
+}

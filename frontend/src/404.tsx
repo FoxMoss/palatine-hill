@@ -1,117 +1,59 @@
-import { css, type FC } from "dreamland/core";
-export default function ErrorPage(this: FC<{}, {}>) {
+import { type FC, type ComponentChild } from "dreamland/core";
+import { router } from "dreamland/router";
+
+export function PageTemplate(this: FC<{ children?: ComponentChild }, {}>) {
   return (
-    <div>
+    <div class="pagetemplate">
       <div class="container">
         <div class="paragraph">
-          <h1 class="title lato-black">Palatine Hill</h1>
+          <h1 class="title lato-black" on:click={() => router.navigate("/")}>
+            Palatine Hill
+          </h1>
           <div class="border" />
         </div>
-        <h3 class="lato-bold paragraph">404 hill not found.</h3>
+        <h3 class="lato-bold paragraph">{this.children}</h3>
       </div>
     </div>
   );
 }
-ErrorPage.style = css`
-  .rsvp {
-    width: 100%;
-    height: 30px;
-  }
 
-  .title {
-    width: 300px;
-    margin-bottom: 0;
-    font-size: xxx-large;
-  }
+export function Page404(this: FC<{}, {}>) {
+  return <PageTemplate>404, Hill not found.</PageTemplate>;
+}
 
-  .embed {
-    position: relative;
-    margin: 10px;
-  }
+export function PageGenericError(this: FC<{}, {}>) {
+  return <PageTemplate>An error has occured, please try again.</PageTemplate>;
+}
 
-  .container {
-    margin-top: 40px;
+export function PageLogin(this: FC<{}, {}>) {
+  this.cx.mount = () => {
+    window.location.assign(
+      `https://auth.hackclub.com/oauth/authorize?client_id=5f0bfe15fda9940ed93fd88aa4f0c3e0&redirect_uri=${encodeURIComponent(window.location.origin + "/auth/callback")}&response_type=code&scope=name+profile+verification_status+slack_id`,
+    );
+  };
+  return <PageTemplate>Redirecting to login...</PageTemplate>;
+}
 
-    color: #5c4e43;
-  }
-  @media screen and (width >= 800px) {
-    .container {
-      margin-left: calc((100vw - 70vw) / 2);
-      margin-right: calc((100vw - 70vw) / 2);
+export function PageCallback(this: FC<{}, {}>) {
+  return <PageTemplate>Running up that hill...</PageTemplate>;
+}
+
+export function Dashboard(this: FC<{}, { user: String }>) {
+  this.cx.mount = () => {
+    if (!localStorage["access_token"]) {
+      window.location.assign("/auth/login");
     }
-  }
+    this.user = localStorage["name"];
+  };
 
-  @media screen and (width < 800px) {
-    .paragraph {
-      margin: 10px;
-    }
-  }
-  .border {
-    position: absolute;
-    width: 260px;
-    border: 2px solid #5c4e43;
-    filter: url(#squiggle);
-  }
-
-  .horizontal-line {
-    position: absolute;
-    transform: translate(-4px, -4px);
-    width: calc(100% + 8px);
-    height: calc(100% + 8px);
-    background: #5c4e43;
-    filter: url(#squiggle);
-  }
-
-  .embed-body {
-    z-index: 1;
-    position: relative;
-    width: 100%;
-    background: #ead8c0;
-    padding-bottom: 10px;
-  }
-
-  .part-table-bg {
-    position: absolute;
-    transform: translate(-4px, -4px);
-    width: calc(100%);
-    height: calc(100%);
-    background: #5c4e43;
-    filter: url(#squiggle);
-
-    display: grid;
-    grid-template-columns: 20% 20% 20% 20% auto;
-    gap: 4px;
-    padding: 4px;
-    grid-auto-flow: column;
-  }
-
-  .part-table-container {
-    position: relative;
-    margin: 10px;
-    margin-top: 50px;
-    margin-bottom: 50px;
-  }
-
-  .part-table {
-    display: grid;
-    grid-template-columns: 20% 20% 20% 20% auto;
-    justify-content: stretch;
-    grid-auto-flow: column;
-    gap: 4px;
-  }
-
-  .part-bg {
-    position: relative;
-    background: #ead8c0;
-  }
-
-  .part {
-    position: relative;
-    z-index: 1;
-    margin-left: 4px;
-    margin-right: 4px;
-  }
-  .mermaid > svg {
-    max-height: 40vh;
-  }
-`;
+  return (
+    <PageTemplate>
+      Logged in as{" "}
+      <span>
+        {use(this.user)
+          .and((val) => val)
+          .or("...")}
+      </span>
+    </PageTemplate>
+  );
+}

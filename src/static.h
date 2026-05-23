@@ -3,11 +3,13 @@
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
+#include <print>
 
 #include "oatpp/base/Log.hpp"
 #include "oatpp/json/ObjectMapper.hpp"
 #include "oatpp/macro/codegen.hpp"
 #include "oatpp/macro/component.hpp"
+#include "oatpp/network/Url.hpp"
 #include "oatpp/web/server/api/ApiController.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
@@ -37,8 +39,13 @@ class StaticController : public oatpp::web::server::api::ApiController {
   }
 
   ENDPOINT("GET", "/*", root,
-           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
-    std::string path = request->getPathTail();
+           REQUEST(std::shared_ptr<IncomingRequest>, request), QUERIES(QueryParams, queries)) {
+    std::string raw_url = request->getStartingLine().path.std_str();
+    auto url = oatpp::network::Url::Parser::parseUrl(raw_url);
+    std::string path = url.path;
+    if (path.size() > 0) {
+      path.erase(0, 1); // erase leading /
+    }
 
     Status ret_status = Status::CODE_200;
 
@@ -47,6 +54,12 @@ class StaticController : public oatpp::web::server::api::ApiController {
     }
 
     auto file_path = std::filesystem::current_path() / "public" / path;
+
+
+    if (file_path.extension() == "") {
+      file_path += ".html";
+    }
+
     if (!std::filesystem::exists(file_path)) {
       ret_status = Status::CODE_404;
       file_path = std::filesystem::current_path() / "public" / "404.html";
