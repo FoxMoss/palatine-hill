@@ -72,6 +72,7 @@ class StaticController : public oatpp::web::server::api::ApiController {
       fseek(file_fd, 0, SEEK_SET);
       std::string file_str(file_size, '\0');
       fread(file_str.data(), 1, file_size, file_fd);
+      fclose(file_fd);
 
       auto response = createResponse(ret_status, file_str);
 

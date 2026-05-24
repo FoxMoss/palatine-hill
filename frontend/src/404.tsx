@@ -38,22 +38,3 @@ export function PageCallback(this: FC<{}, {}>) {
   return <PageTemplate>Running up that hill...</PageTemplate>;
 }
 
-export function Dashboard(this: FC<{}, { user: String }>) {
-  this.cx.mount = () => {
-    if (!localStorage["access_token"]) {
-      window.location.assign("/auth/login");
-    }
-    this.user = localStorage["name"];
-  };
-
-  return (
-    <PageTemplate>
-      Logged in as{" "}
-      <span>
-        {use(this.user)
-          .and((val) => val)
-          .or("...")}
-      </span>
-    </PageTemplate>
-  );
-}

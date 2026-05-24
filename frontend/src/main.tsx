@@ -1,7 +1,8 @@
 import { ComponentInstance, type FC } from "dreamland/core";
 import { Route, Router } from "dreamland/router";
 import mermaid from "mermaid";
-import { Dashboard, Page404, PageCallback, PageGenericError, PageLogin } from "./404";
+import { Page404, PageCallback, PageGenericError, PageLogin } from "./404";
+import { Dashboard } from "./dashboard";
 
 mermaid.initialize({
   theme: "base",
