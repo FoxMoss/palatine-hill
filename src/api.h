@@ -13,6 +13,7 @@
 #include "dbclient.h"
 #include "nlohmann/json_fwd.hpp"
 #include "oatpp/base/Log.hpp"
+#include "oatpp/encoding/Url.hpp"
 #include "oatpp/json/ObjectMapper.hpp"
 #include "oatpp/macro/codegen.hpp"
 #include "oatpp/macro/component.hpp"
@@ -47,7 +48,7 @@ class ApiController : public oatpp::web::server::api::ApiController {
     return nmemb;
   }
 
-  ENDPOINT("GET", "/auth/callback", root,
+  ENDPOINT("GET", "/auth/callback", verify_auth,
            REQUEST(std::shared_ptr<IncomingRequest>, request),
            QUERY(String, code)) {
     std::string raw_url =
@@ -95,8 +96,6 @@ class ApiController : public oatpp::web::server::api::ApiController {
       if (!out_parsed["access_token"].is_string()) {
         goto error_response;
       }
-
-      auto payload_str = payload.dump();
 
       CURLcode result;
       CURL* curl;
@@ -165,10 +164,43 @@ class ApiController : public oatpp::web::server::api::ApiController {
     Status ret_status = Status::CODE_303;
     auto response = createResponse(ret_status, out_json);
     response->putHeader(Header::CONTENT_TYPE, "text/html");
-    response->putHeader("Location", "/error");
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    out_json, oatpp::encoding::Url::Config())));
+    return response;
+  }
+
+  ENDPOINT("POST", "/api/v1/pitch_submit", pitch_submit,
+           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
+    std::string error = "Unknown error";
+
+    {
+      auto submit_str =
+          "?" + request->getBodyDecoder()->decodeToString(
+                    request->getHeaders(), request->getBodyStream().get(),
+                    request->getConnection().get());
+      auto submit_params =
+          oatpp::network::Url::Parser::parseQueryParams(submit_str);
+
+      Status ret_status = Status::CODE_200;
+      auto response = createResponse(ret_status, submit_params.get("title"));
+      response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+      return response;
+    }
+
+  unhandled_error:
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, "");
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    error, oatpp::encoding::Url::Config())));
     return response;
   }
 };
 
 #include OATPP_CODEGEN_END(ApiController)
-

@@ -1,4 +1,4 @@
-import { type FC, type ComponentChild } from "dreamland/core";
+import { type FC, type ComponentChild, css } from "dreamland/core";
 import { router } from "dreamland/router";
 
 export function PageTemplate(this: FC<{ children?: ComponentChild }, {}>) {
@@ -21,9 +21,26 @@ export function Page404(this: FC<{}, {}>) {
   return <PageTemplate>404, Hill not found.</PageTemplate>;
 }
 
-export function PageGenericError(this: FC<{}, {}>) {
-  return <PageTemplate>An error has occured, please try again.</PageTemplate>;
+export function PageGenericError(this: FC<{}, { error: string }>) {
+  this.error = "";
+  this.cx.mount = () => {
+    const url_params = new URLSearchParams(window.location.search);
+    if (url_params.get("error") != null) {
+      this.error = url_params.get("error")!;
+    }
+  };
+  return (
+    <PageTemplate>
+      <div>An error has occured, please try again.</div>
+      <div class="error">{use(this.error)}</div>
+    </PageTemplate>
+  );
 }
+PageGenericError.style = css`
+  .error {
+    color: red;
+  }
+`;
 
 export function PageLogin(this: FC<{}, {}>) {
   this.cx.mount = () => {
@@ -37,4 +54,3 @@ export function PageLogin(this: FC<{}, {}>) {
 export function PageCallback(this: FC<{}, {}>) {
   return <PageTemplate>Running up that hill...</PageTemplate>;
 }
-

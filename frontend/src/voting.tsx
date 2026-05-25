@@ -1,5 +1,5 @@
-
 import { css, type FC, ComponentChild } from "dreamland/core";
+import { router } from "dreamland/router";
 
 export type Post = {
   name: string;
@@ -7,26 +7,84 @@ export type Post = {
   author: string;
   slackDiscusion: string;
 };
-export function PalatineHeader(this: FC<{ children?: ComponentChild }, {}>) {
+
+export function PalatineHeader(
+  this: FC<
+    { clickable: boolean; children?: ComponentChild },
+    { username: String; blured: boolean }
+  >,
+) {
+  this.blured = true;
+  this.cx.mount = () => {
+    this.username = localStorage["name"];
+    this.blured = false;
+  };
+
   return (
     <div class="header">
-      <div>
-        <div class="lato-black">Palatine Hill:</div>
-        <div class="border" />
+      <span>
+        <span>
+          <span class="lato-black">Palatine Hill:</span>
+          <div class="border" />
+        </span>
+        <span class="lato-bold title">{this.children}</span>
+      </span>
+
+      <div class="lato-regular title clickables">
+        <span
+          class="page-link lato-bold"
+          on:click={() => {
+            if (this.clickable) {
+              router.navigate("dashboard");
+            }
+          }}
+        >
+          voting
+        </span>
+        <span
+          class="page-link lato-bold"
+          on:click={() => {
+            if (this.clickable) {
+              router.navigate("dashboard/pitch");
+            }
+          }}
+        >
+          pitch
+        </span>
+        <div
+          style={{
+            color: use(this.blured).map((val) =>
+              val ? "transparent" : "black",
+            ),
+          }}
+          class="username"
+        >
+          {use(this.username).and(use(this.username)).or("Johnathan Fraud")}
+        </div>
       </div>
-      <div class="lato-bold title">{this.children}</div>
     </div>
   );
 }
 
 PalatineHeader.style = css`
+  .clickables {
+    display: flex;
+  }
+  .username {
+    transition: all 0.75s cubic-bezier(0.71, 0, 0.33, 1.56) 0ms;
+    min-width: 15vw;
+  }
+
   .header {
     display: flex;
+    justify-content: space-between;
+
     height: 30px;
     background: #f8bf7a;
     padding: 4px;
     flex-direction: row;
     align-items: center;
+    transition: all 0.75s cubic-bezier(0.71, 0, 0.33, 1.56) 0ms;
   }
   .title {
     margin-left: 5px;
@@ -36,6 +94,11 @@ PalatineHeader.style = css`
     width: 87px;
     border: 1px solid #5c4e43;
     filter: url(#squiggle-large);
+  }
+  .page-link {
+    text-decoration: underline;
+    margin-right: 5px;
+    cursor: pointer;
   }
 `;
 
@@ -51,7 +114,9 @@ export function Voting(
 ) {
   return (
     <div>
-      <PalatineHeader>Vote</PalatineHeader>
+      <PalatineHeader clickable={this.readonly ? false : true}>
+        Vote
+      </PalatineHeader>
       <div>
         {use(this.posts)
           .map((posts) => {

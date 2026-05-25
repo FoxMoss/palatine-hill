@@ -1,13 +1,15 @@
 #include "error.h"
 
 #include "oatpp/data/stream/BufferStream.hpp"
+#include "oatpp/encoding/Url.hpp"
+#include <format>
 
 ErrorHandler::ErrorHandler(
-    const std::shared_ptr<oatpp::web::mime::ContentMappers>& mappers)
+    const std::shared_ptr<oatpp::web::mime::ContentMappers> &mappers)
     : m_mappers(mappers) {}
 
-std::shared_ptr<ErrorHandler::OutgoingResponse> ErrorHandler::renderError(
-    const HttpServerErrorStacktrace& stacktrace) {
+std::shared_ptr<ErrorHandler::OutgoingResponse>
+ErrorHandler::renderError(const HttpServerErrorStacktrace &stacktrace) {
   Status status = stacktrace.status;
   if (status.description == nullptr) {
     status.description = "Unknown";
@@ -15,8 +17,8 @@ std::shared_ptr<ErrorHandler::OutgoingResponse> ErrorHandler::renderError(
 
   oatpp::data::stream::BufferOutputStream string_stream;
 
-  for (const auto& stack_frame : stacktrace.stack) {
-    string_stream << stack_frame  << "\n";
+  for (const auto &stack_frame : stacktrace.stack) {
+    string_stream << stack_frame << "\n";
   }
 
   auto error = StatusDto::createShared();
@@ -35,11 +37,19 @@ std::shared_ptr<ErrorHandler::OutgoingResponse> ErrorHandler::renderError(
   }
 
   auto response =
-      ResponseFactory::createResponse(stacktrace.status, error, mapper);
+      ResponseFactory::createResponse(Status::CODE_303, error, mapper);
 
-  for (const auto& pair : stacktrace.headers.getAll()) {
+  for (const auto &pair : stacktrace.headers.getAll()) {
     response->putHeader(pair.first.toString(), pair.second.toString());
   }
+
+  response->putHeader(
+      "Location",
+      std::format("/error?error={}",
+                  (std::string)oatpp::encoding::Url::encode(
+                      std::format("{} {}", stacktrace.status.code,
+                                  (std::string)string_stream.toString()),
+                      oatpp::encoding::Url::Config())));
 
   return response;
 }
