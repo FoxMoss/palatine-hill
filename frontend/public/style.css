@@ -100,3 +100,11 @@ body, html {
     filter: url(#squiggle);
   }
 }
+
+@media screen and (width >= 800px) {
+  .fullscreen-container {
+    margin-left: calc((100vw - 80vw) / 2);
+    margin-right: calc((100vw - 80vw) / 2);
+    margin-top: 10px;
+  }
+}

@@ -71,7 +71,7 @@ PalatineHeader.style = css`
     display: flex;
   }
   .username {
-    transition: all 0.75s cubic-bezier(0.71, 0, 0.33, 1.56) 0ms;
+    transition: color 0.75s cubic-bezier(0.71, 0, 0.33, 1.56) 0ms;
     min-width: 15vw;
   }
 
@@ -117,7 +117,14 @@ export function Voting(
       <PalatineHeader clickable={this.readonly ? false : true}>
         Vote
       </PalatineHeader>
-      <div>
+      <div
+        class="posts"
+        style={{
+          opacity: use(this.posts).map((val) =>
+            (!val || val?.length == 0) ? "0" : "1",
+          ),
+        }}
+      >
         {use(this.posts)
           .map((posts) => {
             return posts?.map((post, index) => (
@@ -149,6 +156,10 @@ export function Voting(
 }
 
 Voting.style = css`
+  .posts {
+    transition: opacity 0.75s cubic-bezier(0.71, 0, 0.33, 1.56) 0ms;
+  }
+
   .placeholder {
     padding: 10px;
     margin: 10px;

@@ -13,11 +13,13 @@
 #include "dbclient.h"
 #include "nlohmann/json_fwd.hpp"
 #include "oatpp/base/Log.hpp"
+#include "oatpp/data/mapping/ObjectMapper.hpp"
 #include "oatpp/encoding/Url.hpp"
 #include "oatpp/json/ObjectMapper.hpp"
 #include "oatpp/macro/codegen.hpp"
 #include "oatpp/macro/component.hpp"
 #include "oatpp/network/Url.hpp"
+#include "oatpp/web/mime/ContentMappers.hpp"
 #include "oatpp/web/server/api/ApiController.hpp"
 
 #include OATPP_CODEGEN_BEGIN(ApiController)
@@ -151,9 +153,14 @@ class ApiController : public oatpp::web::server::api::ApiController {
           out_parsed["access_token"].get<std::string>(), combined_name);
 
       OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
-      localdb->register_access_token(
+      auto res = localdb->register_access_token(
           me_parsed["identity"]["slack_id"].get<std::string>(),
           out_parsed["access_token"].get<std::string>(), combined_name);
+
+      if (!res->isSuccess()) {
+        out_json = res->getErrorMessage();
+        goto error_response;
+      }
 
       Status ret_status = Status::CODE_200;
       auto response = createResponse(ret_status, return_body);
@@ -183,10 +190,90 @@ class ApiController : public oatpp::web::server::api::ApiController {
       auto submit_params =
           oatpp::network::Url::Parser::parseQueryParams(submit_str);
 
-      Status ret_status = Status::CODE_200;
+      if (submit_params.get("access_token") == "") {
+        error = "Must have key \"access_token\"";
+        goto unhandled_error;
+      }
+      if (submit_params.get("title") == "") {
+        error = "Must have key \"title\"";
+        goto unhandled_error;
+      }
+      if (submit_params.get("explanation") == "") {
+        error = "Must have key \"explanation\"";
+        goto unhandled_error;
+      }
+
+      OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+
+      auto res = localdb->get_account_from_access_token(
+          submit_params.get("access_token"));
+
+      if (!res->isSuccess()) {
+        error = res->getErrorMessage();
+        goto unhandled_error;
+      }
+
+      auto account_infos =
+          res->fetch<oatpp::Vector<oatpp::Object<AccountInfoDto>>>(1);
+
+      if (account_infos->size() != 1) {
+        error = "Account info rows turned out unexpected";
+        goto unhandled_error;
+      }
+
+      res = localdb->create_pitch(
+          account_infos[0]->slack_id,
+          oatpp::encoding::Url::decode(submit_params.get("title")),
+          oatpp::encoding::Url::decode(submit_params.get("explanation")));
+      if (!res->isSuccess()) {
+        error = res->getErrorMessage();
+        goto unhandled_error;
+      }
+
+      Status ret_status = Status::CODE_303;
       auto response = createResponse(ret_status, submit_params.get("title"));
+      response->putHeader("Location", "/dashboard");
+
       response->putHeader(Header::CONTENT_TYPE, "text/html");
 
+      return response;
+    }
+
+  unhandled_error:
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, "");
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    error, oatpp::encoding::Url::Config())));
+    return response;
+  }
+
+  ENDPOINT("GET", "/api/v1/dashboard", get_dashboard,
+           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
+    std::string error = "Unknown error";
+
+    {
+      OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+
+      auto res = localdb->get_pitches();
+
+      if (!res->isSuccess()) {
+        error = res->getErrorMessage();
+        goto unhandled_error;
+      }
+
+      auto posts = res->fetch<oatpp::Vector<oatpp::Object<PostDto>>>(-1);
+      Status ret_status = Status::CODE_200;
+
+      OATPP_COMPONENT(std::shared_ptr<oatpp::web::mime::ContentMappers>,
+                      contentmappers);
+
+      auto response = ResponseFactory::createResponse(
+          ret_status, posts, contentmappers->getDefaultMapper());
+      response->putHeader(Header::CONTENT_TYPE, "application/json");
       return response;
     }
 

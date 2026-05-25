@@ -24,6 +24,7 @@ class AppComponent {
 
     auto mappers = std::make_shared<oatpp::web::mime::ContentMappers>();
     mappers->putMapper(json);
+    mappers->setDefaultMapper(json);
 
     return mappers;
   }());
