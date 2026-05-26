@@ -1,8 +1,10 @@
 #pragma once
 
+#include <memory>
 #include <print>
 
 #include "dbclient.h"
+#include "env.h"
 #include "error.h"
 #include "oatpp-sqlite/ConnectionProvider.hpp"
 #include "oatpp-sqlite/Executor.hpp"
@@ -12,6 +14,7 @@
 #include "oatpp/web/mime/ContentMappers.hpp"
 #include "oatpp/web/server/HttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"
+#include "slack.h"
 
 #define PORT 8080
 
@@ -31,13 +34,21 @@ class AppComponent {
 
   OATPP_CREATE_COMPONENT(
       std::shared_ptr<oatpp::network::ServerConnectionProvider>,
-      serverConnectionProvider)([] {
+      server_connection_provider)([] {
     return oatpp::network::tcp::server::ConnectionProvider::createShared(
         {"0.0.0.0", PORT, oatpp::network::Address::IP_4});
   }());
 
+  OATPP_CREATE_COMPONENT(std::shared_ptr<SlackApi>, slack_api)([] {
+    return std::make_shared<SlackApi>();
+  }());
+
+  OATPP_CREATE_COMPONENT(std::shared_ptr<EnvReader>, env_reader)([] {
+    return std::make_shared<EnvReader>(".env.json");
+  }());
+
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>,
-                         httpRouter)([] {
+                         http_router)([] {
     return oatpp::web::server::HttpRouter::createShared();
   }());
 
@@ -45,21 +56,21 @@ class AppComponent {
                          serverConnectionHandler)([] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
     OATPP_COMPONENT(std::shared_ptr<oatpp::web::mime::ContentMappers>,
-                    contentMappers);
+                    content_mappers);
 
-    auto connectionHandler =
+    auto connection_handler =
         oatpp::web::server::HttpConnectionHandler::createShared(router);
-    connectionHandler->setErrorHandler(
-        std::make_shared<ErrorHandler>(contentMappers));
-    return connectionHandler;
+    connection_handler->setErrorHandler(
+        std::make_shared<ErrorHandler>(content_mappers));
+    return connection_handler;
   }());
 
   OATPP_CREATE_COMPONENT(std::shared_ptr<LocalDb>, dbclient)([] {
-    auto connectionProvider =
+    auto connection_provider =
         std::make_shared<oatpp::sqlite::ConnectionProvider>("persistent.db");
 
     auto executor =
-        std::make_shared<oatpp::sqlite::Executor>(connectionProvider);
+        std::make_shared<oatpp::sqlite::Executor>(connection_provider);
 
     return std::make_shared<LocalDb>(executor);
   }());

@@ -2,8 +2,8 @@ add_executable(palatine
  main.cpp
  error.cpp
  dbclient.cpp
+ curlutil.cpp
 )
-
 
 include(FetchContent)
 set(OATPP_BUILD_TESTS OFF)

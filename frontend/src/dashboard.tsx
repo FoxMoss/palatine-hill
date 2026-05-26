@@ -1,4 +1,4 @@
-import { type FC } from "dreamland/core";
+import { css, type FC } from "dreamland/core";
 import { Post, Voting } from "./voting";
 import { PitchBox } from "./pitch";
 
@@ -12,22 +12,29 @@ export function Dashboard(
     this.user = localStorage["name"];
 
     fetch("/api/v1/dashboard").then((res) =>
-      res
-        .json()
-        .then(
-          (
-            res: Array<{
-              name: String;
-              slack_id: String;
-              title: String;
-              explanation: String;
-              id: Number;
-            }>,
-          ) => {
-            // TODO calc points
-            this.posts = res.map((item) => ({"name": item.title, "author": item.name, points: 0} as Post));
-          },
-        ),
+      res.json().then(
+        (
+          res: Array<{
+            name: String;
+            slack_id: String;
+            title: String;
+            explanation: String;
+            id: Number;
+            pitch_timestamp: String;
+          }>,
+        ) => {
+          // TODO calc points
+          this.posts = res.map(
+            (item) =>
+              ({
+                name: item.title,
+                author: item.name,
+                points: 0,
+                slackDiscusion: item.pitch_timestamp,
+              }) as Post,
+          );
+        },
+      ),
     );
   };
 
@@ -37,6 +44,7 @@ export function Dashboard(
     </div>
   );
 }
+Dashboard.style = css``;
 
 export function Pitch(this: FC<{}, { user: String }>) {
   this.cx.mount = () => {

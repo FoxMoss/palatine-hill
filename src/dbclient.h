@@ -42,6 +42,9 @@ class PostDto : public oatpp::DTO {
 
   DTO_FIELD_INFO(id) {}
   DTO_FIELD(UInt32, id);
+
+  DTO_FIELD_INFO(pitch_timestamp) {}
+  DTO_FIELD(String, pitch_timestamp);
 };
 
 #include OATPP_CODEGEN_END(DTO)
@@ -74,10 +77,12 @@ class LocalDb : public oatpp::orm::DbClient {
           connection = nullptr);
 
   QUERY(create_pitch,
-        "INSERT INTO pitches (slack_id, title, explanation) VALUES (:slack_id, "
-        ":title, :explanation)",
+        "INSERT INTO pitches (slack_id, title, explanation, pitch_timestamp) "
+        "VALUES (:slack_id, "
+        ":title, :explanation, :pitch_timestamp)",
         PARAM(oatpp::String, slack_id), PARAM(oatpp::String, title),
-        PARAM(oatpp::String, explanation))
+        PARAM(oatpp::String, explanation),
+        PARAM(oatpp::String, pitch_timestamp))
 
   QUERY(get_account_from_access_token,
         "SELECT * FROM access_tokens WHERE access_token=:access_token",

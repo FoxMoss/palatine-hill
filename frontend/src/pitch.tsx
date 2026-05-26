@@ -26,7 +26,7 @@ export function PitchBox(
       explanation?: string;
     },
     {
-      access_token:string
+      access_token: string;
     }
   >,
 ) {
@@ -37,8 +37,19 @@ export function PitchBox(
     this.explanation = "";
   }
 
+  const update_md = () => {
+    if (DOMPurify.sanitize) {
+      const parsed = marked.parse(this.explanation!);
+      const preview = this.root.querySelector("#preview");
+      if (preview) {
+        preview.innerHTML = DOMPurify.sanitize(parsed.toString());
+      }
+    }
+  };
+
   this.cx.mount = () => {
-    this.access_token= localStorage["access_token"];
+    this.access_token = localStorage["access_token"];
+    update_md();
   };
 
   return (
@@ -49,7 +60,11 @@ export function PitchBox(
       <div class="lato-bold content">
         <form class="form" method="post" action="/api/v1/pitch_submit">
           <div class="form-body">
-                      <input style={{"display": "none"}} name="access_token" value={use(this.access_token)}/>
+            <input
+              style={{ display: "none" }}
+              name="access_token"
+              value={use(this.access_token)}
+            />
             <label for="pitch-title">title</label>
             <input
               type="text"
@@ -57,6 +72,7 @@ export function PitchBox(
               name="title"
               readonly={this.readonly}
               value={use(this.title)}
+              maxlength="256"
               required
             />
             <label for="pitch-explanation">
@@ -69,15 +85,10 @@ export function PitchBox(
               name="explanation"
               readonly={this.readonly}
               value={use(this.explanation)}
+              maxlength="12000"
               on:input={(e: InputEvent) => {
                 this.explanation = (e.target as HTMLTextAreaElement).value;
-                if (DOMPurify.sanitize) {
-                  const parsed = marked.parse(this.explanation!);
-                  const preview = this.root.querySelector("#preview");
-                  if (preview) {
-                    preview.innerHTML = DOMPurify.sanitize(parsed.toString());
-                  }
-                }
+                update_md();
               }}
               required
             ></textarea>

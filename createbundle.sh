@@ -6,5 +6,6 @@ mkdir -p bundle/public/
 cp -r frontend/dist/static/* bundle/public/
 
 cp -r migrations bundle/
-cp -r bundle/* build/
+cp -r .env.json bundle/
+cp -rT bundle/ build/
 

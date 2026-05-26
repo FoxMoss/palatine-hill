@@ -1,27 +1,23 @@
+#include <print>
+
+#include "api.h"
 #include "component.h"
 #include "oatpp/base/Log.hpp"
 #include "oatpp/network/Server.hpp"
 #include "oatpp/network/tcp/server/ConnectionProvider.hpp"
 #include "oatpp/web/server/HttpConnectionHandler.hpp"
 #include "static.h"
-#include "api.h"
-#include <print>
 
 #define PORT 8080
 
 int main(int argv, char* argc[]) {
   oatpp::Environment::init();
 
-  if (argv != 3) {
-    std::println(stderr, "USAGE: {} [auth_client_id] [auth_client_secret]", argc[0]);
-    return 1;
-  }
-
   AppComponent components;
 
   OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
 
-  router->addController(ApiController::createShared(argc[1], argc[2]));
+  router->addController(ApiController::createShared());
   router->addController(StaticController::createShared());
 
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>,

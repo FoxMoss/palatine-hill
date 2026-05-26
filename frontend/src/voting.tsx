@@ -120,13 +120,11 @@ export function Voting(
       <div
         class="posts"
         style={{
-          opacity: use(this.posts).map((val) =>
-            (!val || val?.length == 0) ? "0" : "1",
-          ),
+          opacity: use(this.posts).map((val) => (!val ? "0" : "1")),
         }}
       >
-        {use(this.posts)
-          .map((posts) => {
+        {use(this.posts).map((posts) => {
+          if (posts?.length != 0) {
             return posts?.map((post, index) => (
               <div class="post">
                 <div class="lato-black place">{index + 1}.</div>
@@ -136,20 +134,31 @@ export function Voting(
                     <path d="M297.4 169.4C309.9 156.9 330.2 156.9 342.7 169.4L534.7 361.4C547.2 373.9 547.2 394.2 534.7 406.7C522.2 419.2 501.9 419.2 489.4 406.7L320 237.3L150.6 406.6C138.1 419.1 117.8 419.1 105.3 406.6C92.8 394.1 92.8 373.8 105.3 361.3L297.3 169.3z" />
                   </svg>
                 </div>
-                <div class="lato-bold name">{post.name}</div>
+                <div
+                  class="lato-bold name"
+                  on:click={() => {
+                    if (post.slackDiscusion != "about:blank") {
+                      window.open(
+                        `https://hackclub.slack.com/archives/C0B697HHCE6/p${post.slackDiscusion?.replace(".", "")}?thread_ts=${post.slackDiscusion}&cid=C0B697HHCE6`,
+                      );
+                    }
+                  }}
+                >
+                  {post.name}
+                </div>
                 <div class="lato-regular info">
                   {post.points} points by {post.author}
                 </div>
               </div>
             ));
-          })
-          .or(
-            <div class="placeholder lato-bold">
-              {use(this.loading)
-                .and("Loading...")
-                .or("Hi! You're the first person here, mind the quietness.")}
-            </div>,
-          )}
+          }
+          return (
+            <div class="lato-regular">
+              You're the first one here, so it's a little quiet. Pitches will
+              apear here soon!
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -193,6 +202,7 @@ Voting.style = css`
   }
   .name {
     grid-area: name;
+    cursor: pointer;
   }
   .info {
     grid-area: info;
