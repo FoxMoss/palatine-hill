@@ -24,6 +24,7 @@ export function PitchBox(
       submit_disabled: boolean;
       title?: string;
       explanation?: string;
+      pitching?: () => void;
     },
     {
       access_token: string;
@@ -58,7 +59,14 @@ export function PitchBox(
         Pitch
       </PalatineHeader>
       <div class="lato-bold content">
-        <form class="form" method="post" action="/api/v1/pitch_submit">
+        <form
+          class="form"
+          method="post"
+          action="/api/v1/pitch_submit"
+          on:submit={() => {
+            this.pitching ? this.pitching() : null;
+          }}
+        >
           <div class="form-body">
             <input
               style={{ display: "none" }}

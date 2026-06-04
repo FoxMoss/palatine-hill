@@ -163,24 +163,28 @@ export default function Homepage(this: FC<{}, {}>) {
                   points: 112,
                   author: "William Daniel",
                   slackDiscusion: "about:blank",
+                  id: 0,
                 },
                 {
                   name: "Doom in a PDF",
                   points: 97,
                   author: "vk6",
                   slackDiscusion: "about:blank",
+                  id: 0,
                 },
                 {
                   name: "Hexecute: Launch apps by casting spells!",
                   points: 85,
                   author: "Andromeda",
                   slackDiscusion: "about:blank",
+                  id: 0,
                 },
                 {
                   name: "Porting Celeste (2018) to the browser",
                   points: 76,
                   author: "r58",
                   slackDiscusion: "about:blank",
+                  id: 0,
                 },
               ]}
               loading={false}

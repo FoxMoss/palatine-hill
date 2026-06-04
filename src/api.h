@@ -3,7 +3,10 @@
 #include <curl/curl.h>
 
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -15,6 +18,7 @@
 #include "dbclient.h"
 #include "env.h"
 #include "nlohmann/json_fwd.hpp"
+#include "oatpp/Types.hpp"
 #include "oatpp/base/Log.hpp"
 #include "oatpp/data/mapping/ObjectMapper.hpp"
 #include "oatpp/encoding/Url.hpp"
@@ -185,6 +189,42 @@ class ApiController : public oatpp::web::server::api::ApiController {
   const size_t max_title_len = 256;
   const size_t max_explanation_len = 12000;  // max slack message len
 
+  static std::expected<std::string, std::string> grab_slack_id(
+      std::string access_token) {
+    OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+    auto res = localdb->get_account_from_access_token(access_token);
+
+    if (!res->isSuccess()) {
+      return std::unexpected(res->getErrorMessage());
+    }
+
+    auto account_infos =
+        res->fetch<oatpp::Vector<oatpp::Object<AccountInfoDto>>>(1);
+
+    if (account_infos->size() != 1) {
+      return std::unexpected("Account info rows turned out unexpected");
+    }
+
+    return account_infos[0]->slack_id;
+  }
+
+  static std::expected<std::string, std::string> grab_project(int32_t id) {
+    OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+    auto res = localdb->get_project_from_id(id);
+
+    if (!res->isSuccess()) {
+      return std::unexpected(res->getErrorMessage());
+    }
+
+    auto post_infos = res->fetch<oatpp::Vector<oatpp::Object<PostDto>>>(1);
+
+    if (post_infos->size() != 1) {
+      return std::unexpected("Post info rows turned out unexpected");
+    }
+
+    return post_infos[0]->pitch_timestamp;
+  }
+
   ENDPOINT("POST", "/api/v1/pitch_submit", pitch_submit,
            REQUEST(std::shared_ptr<IncomingRequest>, request)) {
     std::string error = "Unknown error";
@@ -222,19 +262,10 @@ class ApiController : public oatpp::web::server::api::ApiController {
 
       OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
 
-      auto res = localdb->get_account_from_access_token(
-          submit_params.get("access_token"));
-
-      if (!res->isSuccess()) {
-        error = res->getErrorMessage();
-        goto unhandled_error;
-      }
-
-      auto account_infos =
-          res->fetch<oatpp::Vector<oatpp::Object<AccountInfoDto>>>(1);
-
-      if (account_infos->size() != 1) {
-        error = "Account info rows turned out unexpected";
+      auto slack_id =
+          grab_slack_id((std::string)submit_params.get("access_token"));
+      if (!slack_id.has_value()) {
+        error = slack_id.error();
         goto unhandled_error;
       }
 
@@ -245,8 +276,7 @@ class ApiController : public oatpp::web::server::api::ApiController {
       OATPP_COMPONENT(std::shared_ptr<SlackApi>, slack_api);
       auto thread_posted_timestamp = slack_api->post_message(
           std::format("<@{}> Pitched: **{}**\n\nFollow the thread for updates.",
-                      (std::string)account_infos[0]->slack_id,
-                      (std::string)title),
+                      slack_id.value(), (std::string)title),
           "C0B697HHCE6");
 
       if (!thread_posted_timestamp.has_value()) {
@@ -261,8 +291,8 @@ class ApiController : public oatpp::web::server::api::ApiController {
         goto unhandled_error;
       }
 
-      res = localdb->create_pitch(account_infos[0]->slack_id, title,
-                                  explanation, thread_posted_timestamp.value());
+      auto res = localdb->create_pitch(slack_id.value(), title, explanation,
+                                       thread_posted_timestamp.value());
       if (!res->isSuccess()) {
         error = res->getErrorMessage();
         goto unhandled_error;
@@ -312,6 +342,73 @@ class ApiController : public oatpp::web::server::api::ApiController {
       auto response = ResponseFactory::createResponse(
           ret_status, posts, contentmappers->getDefaultMapper());
       response->putHeader(Header::CONTENT_TYPE, "application/json");
+      return response;
+    }
+
+  unhandled_error:
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, "");
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    error, oatpp::encoding::Url::Config())));
+    return response;
+  }
+
+  ENDPOINT("POST", "/api/v1/upvote", upvote,
+           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
+    std::string error = "Unknown error";
+
+    {
+      auto submit_str =
+          "?" + request->getBodyDecoder()->decodeToString(
+                    request->getHeaders(), request->getBodyStream().get(),
+                    request->getConnection().get());
+      auto submit_params =
+          oatpp::network::Url::Parser::parseQueryParams(submit_str);
+
+      if (submit_params.get("access_token") == "") {
+        error = "Must have key \"access_token\"";
+        goto unhandled_error;
+      }
+      if (submit_params.get("project_id") == "") {
+        error = "Must have key \"project_id\"";
+        goto unhandled_error;
+      }
+
+      auto slack_id =
+          grab_slack_id((std::string)submit_params.get("access_token"));
+      if (!slack_id.has_value()) {
+        error = slack_id.error();
+        goto unhandled_error;
+      }
+
+      int32_t project_id = std::stol(submit_params.get("project_id"));
+
+      auto project_ts = grab_project(project_id);
+      if (!project_ts.has_value()) {
+        error = project_ts.error();
+        goto unhandled_error;
+      }
+
+      OATPP_COMPONENT(std::shared_ptr<SlackApi>, slack_api);
+      auto like_msg =
+          slack_api->post_message(std::format("<@{}> Liked", slack_id.value()),
+                                  "C0B697HHCE6", project_ts.value());
+
+      if (!like_msg.has_value()) {
+        error = like_msg.error();
+        goto unhandled_error;
+      }
+
+      OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+      localdb->create_vote(slack_id.value(), project_id, like_msg.value());
+
+      Status ret_status = Status::CODE_200;
+      auto response = createResponse(ret_status, "yep!");
+      response->putHeader(Header::CONTENT_TYPE, "text/html");
       return response;
     }
 
