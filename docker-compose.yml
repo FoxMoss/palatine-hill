@@ -1,7 +1,0 @@
-services:
-  palatine:
-    build: .
-    ports:
-      - "80:8080"
-    volumes:
-      - ./persistent.db:/app/persistent.db

@@ -67,7 +67,7 @@ class AppComponent {
 
   OATPP_CREATE_COMPONENT(std::shared_ptr<LocalDb>, dbclient)([] {
     auto connection_provider =
-        std::make_shared<oatpp::sqlite::ConnectionProvider>("persistent.db");
+        std::make_shared<oatpp::sqlite::ConnectionProvider>("persistent/persistent.db");
 
     auto executor =
         std::make_shared<oatpp::sqlite::Executor>(connection_provider);
