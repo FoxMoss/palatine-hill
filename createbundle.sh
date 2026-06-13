@@ -6,6 +6,5 @@ mkdir -p bundle/public/
 cp -r frontend/dist/static/* bundle/public/
 
 cp -r migrations bundle/
-cp -r .env.json bundle/
-cp -rT bundle/ build/
+cp debian-build/src/palatine bundle/
 

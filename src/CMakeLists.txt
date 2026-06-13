@@ -5,6 +5,16 @@ add_executable(palatine
  curlutil.cpp
 )
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+  add_compile_options(-static)
+  add_link_options(-static)
+  target_compile_options(palatine PUBLIC -static)
+  target_link_options(palatine PUBLIC -static)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  set(BUILD_SHARED_LIBS OFF)
+  set(OATPP_SQLITE_AMALGAMATION ON)
+endif()
+
 include(FetchContent)
 set(OATPP_BUILD_TESTS OFF)
 FetchContent_Declare(
@@ -13,6 +23,9 @@ FetchContent_Declare(
   GIT_TAG "f83d648fd82dc222ef88aabbafb68efbd7d7bf50"
 )
 FetchContent_MakeAvailable(oatpp)
+
+list(APPEND CMAKE_PREFIX_PATH ${oatpp_BUILD_DIR}/src/)
+
 set(OATPP_MODULES_LOCATION "EXTERNAL")
 FetchContent_Declare(
   oatpp-sqlite
@@ -21,20 +34,30 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(oatpp-sqlite)
 
-FetchContent_Declare(
-  CURL 
-  URL https://github.com/curl/curl/releases/download/curl-8_18_0/curl-8.18.0.tar.xz
+CPMAddPackage(
+  URI "gh:curl/curl#curl-8_20_0"
+  OPTIONS "BUILD_STATIC_LIBS ON"
+          "BUILD_SHARED_LIBS OFF"
+          "CURL_USE_OPENSSL OFF"
+          "CURL_USE_WOLFSSL OFF"
+          "CURL_USE_BEARSSL OFF"
+          "CURL_USE_MBEDTLS ON"
+          "CURL_USE_LIBPSL OFF"
+          "CURL_USE_LIBSSH2 OFF"
+          "CURL_ZSTD OFF"
+          "CURL_BROTLI OFF"
+          "USE_NGHTTP2 OFF"
+          "USE_LIBIDN2 OFF"
+          "USE_LIBIDN2 OFF"
+          "CURL_ZLIB OFF"
 )
-FetchContent_MakeAvailable(CURL)
 
 FetchContent_Declare(json 
   URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
 )
 FetchContent_MakeAvailable(json)
 
-target_link_libraries(palatine oatpp oatpp-sqlite libcurl nlohmann_json::nlohmann_json)
-
-add_compile_options(-ggdb)
+target_link_libraries(palatine oatpp oatpp-sqlite CURL::libcurl_static nlohmann_json::nlohmann_json)
 
 add_custom_command(TARGET palatine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy

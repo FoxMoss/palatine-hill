@@ -18,7 +18,8 @@ class EnvReader {
 
  public:
   EnvReader(std::string file_name) {
-    if (std::string(getenv("USE_ENV")) == "") {
+    const char* env = getenv("USE_ENV");
+    if (env == nullptr) {
       if (std::filesystem::exists(file_name)) {
         std::ifstream file_stream(file_name);
         data = nlohmann::json::parse(file_stream);
