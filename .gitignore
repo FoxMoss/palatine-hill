@@ -5,3 +5,4 @@ debian-build/
 compile_commands.json
 bundle/
 .env.json
+bundle.tar.gz

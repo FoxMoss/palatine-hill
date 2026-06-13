@@ -5,7 +5,6 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
   add_compile_definitions(PALATINE_PROD=true)
-  add_compile_options("-O3")
 else()
   add_compile_definitions(PALATINE_PROD=false)
 endif()

@@ -8,3 +8,4 @@ cp -r frontend/dist/static/* bundle/public/
 cp -r migrations bundle/
 cp debian-build/src/palatine bundle/
 
+cd bundle && tar -czvf ../bundle.tar.gz ./

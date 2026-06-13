@@ -5,16 +5,6 @@ add_executable(palatine
  curlutil.cpp
 )
 
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-  add_compile_options(-static)
-  add_link_options(-static)
-  target_compile_options(palatine PUBLIC -static)
-  target_link_options(palatine PUBLIC -static)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-  set(BUILD_SHARED_LIBS OFF)
-  set(OATPP_SQLITE_AMALGAMATION ON)
-endif()
-
 include(FetchContent)
 set(OATPP_BUILD_TESTS OFF)
 FetchContent_Declare(
