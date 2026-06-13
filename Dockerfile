@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-RUN curl -L https://github.com/FoxMoss/palatine-hill/releases/download/v0.0.1/bundle.tar.gz \
+RUN curl -L https://github.com/FoxMoss/palatine-hill/releases/download/v0.0.2/bundle.tar.gz \
     -o bundle.tar.gz \
     && tar -xzf bundle.tar.gz \
     && rm bundle.tar.gz
