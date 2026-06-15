@@ -18,6 +18,9 @@ class AccountInfoDto : public oatpp::DTO {
   DTO_FIELD_INFO(access_token) {}
   DTO_FIELD(String, access_token);
 
+  DTO_FIELD_INFO(hackatime_token) {}
+  DTO_FIELD(String, hackatime_token);
+
   DTO_FIELD_INFO(name) {}
   DTO_FIELD(String, name);
 
@@ -27,6 +30,28 @@ class AccountInfoDto : public oatpp::DTO {
 
 #include OATPP_CODEGEN_END(DTO)
 
+#include OATPP_CODEGEN_BEGIN(DTO)
+
+class VoteDto : public oatpp::DTO {
+  DTO_INIT(VoteDto, DTO)
+
+  DTO_FIELD_INFO(slack_id) {}
+  DTO_FIELD(String, slack_id);
+
+  DTO_FIELD_INFO(project_id) {}
+  DTO_FIELD(Int32, project_id);
+
+  DTO_FIELD_INFO(time_created) {}
+  DTO_FIELD(String, time_created);
+
+  DTO_FIELD_INFO(message_timestamp) {}
+  DTO_FIELD(String, message_timestamp);
+
+  DTO_FIELD_INFO(id) {}
+  DTO_FIELD(Int32, id);
+};
+
+#include OATPP_CODEGEN_END(DTO)
 #include OATPP_CODEGEN_BEGIN(DTO)
 
 class PostDto : public oatpp::DTO {
@@ -47,8 +72,14 @@ class PostDto : public oatpp::DTO {
   DTO_FIELD_INFO(id) {}
   DTO_FIELD(Int32, id);
 
+  DTO_FIELD_INFO(time_created) {}
+  DTO_FIELD(String, time_created);
+
   DTO_FIELD_INFO(pitch_timestamp) {}
   DTO_FIELD(String, pitch_timestamp);
+
+  DTO_FIELD_INFO(vote_count) {}
+  DTO_FIELD(Int32, vote_count);
 };
 
 #include OATPP_CODEGEN_END(DTO)
@@ -82,9 +113,10 @@ class LocalDb : public oatpp::orm::DbClient {
           connection = nullptr);
 
   QUERY(create_pitch,
-        "INSERT INTO pitches (slack_id, title, explanation, pitch_timestamp) "
+        "INSERT INTO pitches (slack_id, title, explanation, pitch_timestamp, "
+        "time_created) "
         "VALUES (:slack_id, "
-        ":title, :explanation, :pitch_timestamp)",
+        ":title, :explanation, :pitch_timestamp, unixepoch())",
         PARAM(oatpp::String, slack_id), PARAM(oatpp::String, title),
         PARAM(oatpp::String, explanation),
         PARAM(oatpp::String, pitch_timestamp))
@@ -96,6 +128,9 @@ class LocalDb : public oatpp::orm::DbClient {
         PARAM(oatpp::String, slack_id), PARAM(oatpp::Int32, project_id),
         PARAM(oatpp::String, message_timestamp))
 
+  QUERY(get_my_votes, "SELECT * FROM votes WHERE slack_id=:slack_id",
+        PARAM(oatpp::String, slack_id))
+
   QUERY(get_account_from_access_token,
         "SELECT * FROM access_tokens WHERE access_token=:access_token",
         PARAM(oatpp::String, access_token))
@@ -104,8 +139,17 @@ class LocalDb : public oatpp::orm::DbClient {
         PARAM(oatpp::Int32, id))
 
   QUERY(get_pitches,
-        "SELECT name, pitches.* FROM pitches INNER JOIN access_tokens ON "
-        "pitches.slack_id=access_tokens.slack_id")
+        "SELECT name, pitches.*, COUNT(votes.id) as vote_count "
+        "FROM pitches "
+        "INNER JOIN access_tokens ON pitches.slack_id=access_tokens.slack_id "
+        "LEFT JOIN votes ON votes.project_id=pitches.id "
+        "GROUP BY pitches.id")
+
+  QUERY(link_hackatime,
+        "UPDATE access_tokens SET hackatime_token=:hackatime_token WHERE "
+        "access_token=:access_token",
+        PARAM(oatpp::String, hackatime_token),
+        PARAM(oatpp::String, access_token))
 };
 
 #include OATPP_CODEGEN_END(DbClient)

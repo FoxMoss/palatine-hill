@@ -110,9 +110,28 @@ export function Voting(
       posts: Post[] | undefined;
       loading: boolean;
     },
-    {}
+    {
+      voted_projects: Number[];
+    }
   >,
 ) {
+  this.voted_projects = [];
+  this.cx.mount = () => {
+    if (!this.readonly) {
+      fetch("/api/v1/my_votes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: localStorage.getItem("access_token"),
+        }),
+      }).then((body) => {
+        body.json().then((json: { project_id: Number }[]) => {
+          this.voted_projects = json.map((project) => project.project_id);
+        });
+      });
+    }
+  };
+
   return (
     <div>
       <PalatineHeader clickable={this.readonly ? false : true}>
@@ -126,44 +145,68 @@ export function Voting(
       >
         {use(this.posts).map((posts) => {
           if (posts?.length != 0) {
-            return posts?.map((post, index) => (
-              <div class="post">
-                <div class="lato-black place">{index + 1}.</div>
-                <div
-                  class="vote"
-                  on:click={(e: MouseEvent) => {
-                    if (!this.readonly) {
-                      const xhr = new XMLHttpRequest();
-                      xhr.open("POST", "/api/v1/upvote");
-                      xhr.send(
-                        `access_token=${encodeURIComponent(localStorage["access_token"])}&project_id=${post.id}`,
-                      );
-                      (e.target as HTMLDivElement).style.opacity = "0";
-                    }
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                    {/*<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->*/}
-                    <path d="M297.4 169.4C309.9 156.9 330.2 156.9 342.7 169.4L534.7 361.4C547.2 373.9 547.2 394.2 534.7 406.7C522.2 419.2 501.9 419.2 489.4 406.7L320 237.3L150.6 406.6C138.1 419.1 117.8 419.1 105.3 406.6C92.8 394.1 92.8 373.8 105.3 361.3L297.3 169.3z" />
-                  </svg>
+            return posts?.map((post, index) => {
+              const voted_on = use(this.voted_projects).map((projects) => {
+                return projects.includes(post.id ? (post.id as number) : -1);
+              });
+
+              return (
+                <div class="post">
+                  <div class="lato-black place">{index + 1}.</div>
+                  <div
+                    class="vote"
+                    style={{
+                      cursor: voted_on.map((val) =>
+                        val ? "initial" : "pointer",
+                      ),
+                    }}
+                    on:click={(e: MouseEvent) => {
+                      if (
+                        !this.readonly &&
+                        (e.target as HTMLDivElement).style.opacity != "0" &&
+                        !voted_on.value
+                      ) {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("POST", "/api/v1/upvote");
+                        xhr.send(
+                          `access_token=${encodeURIComponent(localStorage["access_token"])}&project_id=${post.id}`,
+                        );
+                        this.voted_projects.push(post.id!);
+
+                        this.posts![index].points += 1;
+                        this.posts = this.posts;
+                      }
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 640 640"
+                      style={{
+                        opacity: voted_on.map((val) => (val ? "0" : "1")),
+                      }}
+                    >
+                      {/*<!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->*/}
+                      <path d="M297.4 169.4C309.9 156.9 330.2 156.9 342.7 169.4L534.7 361.4C547.2 373.9 547.2 394.2 534.7 406.7C522.2 419.2 501.9 419.2 489.4 406.7L320 237.3L150.6 406.6C138.1 419.1 117.8 419.1 105.3 406.6C92.8 394.1 92.8 373.8 105.3 361.3L297.3 169.3z" />
+                    </svg>
+                  </div>
+                  <div
+                    class="lato-bold name"
+                    on:click={() => {
+                      if (post.slackDiscusion != "about:blank") {
+                        window.open(
+                          `https://hackclub.slack.com/archives/C0B697HHCE6/p${post.slackDiscusion?.replace(".", "")}?thread_ts=${post.slackDiscusion}&cid=C0B697HHCE6`,
+                        );
+                      }
+                    }}
+                  >
+                    {post.name}
+                  </div>
+                  <div class="lato-regular info">
+                    {post.points} points by {post.author}
+                  </div>
                 </div>
-                <div
-                  class="lato-bold name"
-                  on:click={() => {
-                    if (post.slackDiscusion != "about:blank") {
-                      window.open(
-                        `https://hackclub.slack.com/archives/C0B697HHCE6/p${post.slackDiscusion?.replace(".", "")}?thread_ts=${post.slackDiscusion}&cid=C0B697HHCE6`,
-                      );
-                    }
-                  }}
-                >
-                  {post.name}
-                </div>
-                <div class="lato-regular info">
-                  {post.points} points by {post.author}
-                </div>
-              </div>
-            ));
+              );
+            });
           }
           return (
             <div class="lato-regular">

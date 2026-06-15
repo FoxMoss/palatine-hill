@@ -2,16 +2,19 @@
 
 #include <curl/curl.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #include <expected>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <print>
+#include <ranges>
 #include <string>
 
 #include "curlutil.h"
@@ -47,6 +50,181 @@ class ApiController : public oatpp::web::server::api::ApiController {
                       api_content_mappers),
       OATPP_COMPONENT(std::shared_ptr<EnvReader>, env_reader)) {
     return std::make_shared<ApiController>(api_content_mappers, env_reader);
+  }
+
+  ENDPOINT("POST", "/auth/link_hackatime", link_hackatime,
+           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
+    std::string out_json;  // error output message
+    {
+      auto body = request->readBodyToString();
+      nlohmann::json parsed = nlohmann::json::parse((std::string)body);
+
+      std::string app_token = parsed["app_token"].get<std::string>();
+      std::string code = parsed["code"].get<std::string>();
+
+      std::string raw_url = std::format(
+          "http{}://{}{}", PALATINE_PROD ? "s" : "",
+          (std::string)request->getHeader("Host"), "/auth/hackatime_callback");
+
+      if (!env_reader->get("hackatime_id").has_value()) {
+        out_json = "Backend error: .env.json did not have hackatime_id";
+        goto error_response;
+      }
+
+      if (!env_reader->get("hackatime_secret").has_value()) {
+        out_json = "Backend error: .env.json did not have hackatime_secret";
+        goto error_response;
+      }
+
+      std::string payload_str = std::format(
+          "client_id={}&client_secret={}&redirect_uri={}&code={}&grant_type="
+          "authorization_code",
+          (std::string)oatpp::encoding::Url::encode(
+              env_reader->get("hackatime_id").value(),
+              oatpp::encoding::Url::Config()),
+          (std::string)oatpp::encoding::Url::encode(
+              env_reader->get("hackatime_secret").value(),
+              oatpp::encoding::Url::Config()),
+          (std::string)oatpp::encoding::Url::encode(
+              raw_url, oatpp::encoding::Url::Config()),
+          (std::string)oatpp::encoding::Url::encode(
+              code, oatpp::encoding::Url::Config()));
+
+      CURLcode result;
+      CURL* curl;
+      struct curl_slist* slist = nullptr;
+      slist = curl_slist_append(
+          slist, "Content-Type: application/x-www-form-urlencoded");
+
+      curl = curl_easy_init();
+      curl_easy_setopt(curl, CURLOPT_URL,
+                       "https://hackatime.hackclub.com/oauth/token");
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload_str.c_str());
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
+                       (curl_off_t)payload_str.size());
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_string);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &out_json);
+
+      result = curl_easy_perform(curl);
+
+      curl_easy_cleanup(curl);
+      curl_slist_free_all(slist);
+      slist = nullptr;
+      if (result != CURLE_OK) {
+        goto error_response;
+      }
+
+      std::println("{}", out_json);
+      nlohmann::json out_parsed = nlohmann::json::parse(out_json);
+
+      if (!out_parsed["access_token"].is_string()) {
+        goto error_response;
+      }
+
+      slist = curl_slist_append(slist, "Content-Type: application/json");
+      slist = curl_slist_append(
+          slist, std::format("Authorization: Bearer {}",
+                             out_parsed["access_token"].get<std::string>())
+                     .c_str());
+
+      curl = curl_easy_init();
+      curl_easy_setopt(
+          curl, CURLOPT_URL,
+          "https://hackatime.hackclub.com/api/v1/authenticated/me");
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+
+      out_json = "";
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_string);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &out_json);
+
+      result = curl_easy_perform(curl);
+
+      curl_easy_cleanup(curl);
+      curl_slist_free_all(slist);
+      slist = nullptr;
+
+      if (result != CURLE_OK) {
+        goto error_response;
+      }
+
+      OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+      auto res = localdb->link_hackatime(
+          out_parsed["access_token"].get<std::string>(), app_token);
+
+      if (!res->isSuccess()) {
+        out_json = res->getErrorMessage();
+        goto error_response;
+      }
+
+      Status ret_status = Status::CODE_200;
+      auto response = createResponse(ret_status, "ok");
+      response->putHeader(Header::CONTENT_TYPE, "text/html");
+      response->putHeader("Location", "/setup");
+
+      return response;
+    }
+  error_response:
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, out_json);
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    out_json, oatpp::encoding::Url::Config())));
+    return response;
+  }
+
+  ENDPOINT("GET", "/auth/hackatime_callback", verify_hackatime,
+           REQUEST(std::shared_ptr<IncomingRequest>, request),
+           QUERY(String, code)) {
+    std::string out_json;  // error output message
+
+    {
+      std::string html_body = std::format(R"html(
+<script>
+  const app_token = localStorage.getItem('access_token');
+  const code = '{}';
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/auth/link_hackatime', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function() {{
+    if (xhr.status == 200) {{
+      window.location.href = '/setup';
+    }} else if (xhr.status >= 300 && xhr.status < 400) {{
+      window.location.href = xhr.getResponseHeader('Location') || '/error?error=Hackatime failed';
+    }} else {{
+      window.location.href = '/error?error=' + encodeURIComponent(xhr.responseText);
+    }}
+  }};
+  xhr.onerror = function() {{
+    window.location.href = '/error?error=network_error';
+  }};
+  xhr.send(JSON.stringify({{
+    app_token: app_token,
+    code: code 
+  }}));
+</script>
+)html",
+                                          (std::string)code);
+
+      Status ret_status = Status::CODE_200;
+      auto response = createResponse(ret_status, html_body);
+      response->putHeader(Header::CONTENT_TYPE, "text/html");
+      return response;
+    }
+  error_response:
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, out_json);
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    out_json, oatpp::encoding::Url::Config())));
+    return response;
   }
 
   ENDPOINT("GET", "/auth/callback", verify_auth,
@@ -157,7 +335,7 @@ class ApiController : public oatpp::web::server::api::ApiController {
       std::string combined_name = std::format("{} {}", first_name, last_name);
 
       std::string return_body = std::format(
-          R"(<script>localStorage["access_token"]="{}"; localStorage["name"]="{}"; window.location.assign("/dashboard");</script>)",
+          R"(<script>localStorage["access_token"]="{}"; localStorage["name"]="{}"; window.location.assign("/setup");</script>)",
           out_parsed["access_token"].get<std::string>(), combined_name);
 
       OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
@@ -334,13 +512,41 @@ class ApiController : public oatpp::web::server::api::ApiController {
       }
 
       auto posts = res->fetch<oatpp::Vector<oatpp::Object<PostDto>>>(-1);
+
+      std::vector<std::pair<double, oatpp::Object<PostDto>>> ranked;
+      for (auto post : *posts) {
+        uint64_t unix_epoch =
+            strtoull(post->time_created->c_str(), nullptr, 10);
+        constexpr double hours_in_seconds = 60.0 * 60.0;
+
+        double hours_ago =
+            (double)(time(nullptr) - unix_epoch) / hours_in_seconds;
+
+        OATPP_LOGi("Voting", "{}", hours_ago);
+        auto score = (post->vote_count - 1.0) / std::pow(hours_ago + 2.0, 1.8);
+        ranked.emplace_back(score, post);
+      }
+
+      std::ranges::sort(ranked,
+                        [](std::pair<double, oatpp::Object<PostDto>>& a,
+                           std::pair<double, oatpp::Object<PostDto>>& b) {
+                          return a.first < b.first;
+                        });
+
+      oatpp::Vector<oatpp::Object<PostDto>> ranked_posts =
+          oatpp::Vector<oatpp::Object<PostDto>>::createShared();
+
+      for (auto& post_iter : std::views::reverse(ranked)) {
+        ranked_posts->emplace_back(post_iter.second);
+      }
+
       Status ret_status = Status::CODE_200;
 
       OATPP_COMPONENT(std::shared_ptr<oatpp::web::mime::ContentMappers>,
                       contentmappers);
 
       auto response = ResponseFactory::createResponse(
-          ret_status, posts, contentmappers->getDefaultMapper());
+          ret_status, ranked_posts, contentmappers->getDefaultMapper());
       response->putHeader(Header::CONTENT_TYPE, "application/json");
       return response;
     }
@@ -413,6 +619,94 @@ class ApiController : public oatpp::web::server::api::ApiController {
     }
 
   unhandled_error:
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, "");
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    error, oatpp::encoding::Url::Config())));
+    return response;
+  }
+
+  ENDPOINT("POST", "/api/v1/about_me", about_me,
+           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
+    std::string error;  // error output message
+
+    {
+      auto body = request->readBodyToString();
+      nlohmann::json parsed = nlohmann::json::parse((std::string)body);
+
+      OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+      std::string access_token = parsed["access_token"].get<std::string>();
+      auto res = localdb->get_account_from_access_token(access_token);
+      if (!res->isSuccess()) {
+        error = res->getErrorMessage();
+        goto unhandled_error;
+      }
+
+      auto account_info =
+          res->fetch<oatpp::Vector<oatpp::Object<AccountInfoDto>>>(1);
+
+      OATPP_COMPONENT(std::shared_ptr<oatpp::web::mime::ContentMappers>,
+                      contentmappers);
+
+      Status ret_status = Status::CODE_200;
+      auto response = ResponseFactory::createResponse(
+          ret_status, account_info, contentmappers->getDefaultMapper());
+      response->putHeader(Header::CONTENT_TYPE, "application/json");
+      return response;
+    }
+  unhandled_error:
+
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, "");
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    error, oatpp::encoding::Url::Config())));
+    return response;
+  }
+  ENDPOINT("POST", "/api/v1/my_votes", my_votes,
+           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
+    std::string error;  // error output message
+
+    {
+      auto body = request->readBodyToString();
+      nlohmann::json parsed = nlohmann::json::parse((std::string)body);
+
+      OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+      std::string access_token = parsed["access_token"].get<std::string>();
+
+      auto slack_id = grab_slack_id(access_token);
+      if (!slack_id.has_value()) {
+        error = slack_id.error();
+        goto unhandled_error;
+      }
+
+      auto res = localdb->get_my_votes(slack_id.value());
+
+      if (!res->isSuccess()) {
+        error = res->getErrorMessage();
+        goto unhandled_error;
+      }
+
+      auto votes = res->fetch<oatpp::Vector<oatpp::Object<VoteDto>>>(-1);
+
+      OATPP_COMPONENT(std::shared_ptr<oatpp::web::mime::ContentMappers>,
+                      contentmappers);
+
+      Status ret_status = Status::CODE_200;
+      auto response = ResponseFactory::createResponse(
+          ret_status, votes, contentmappers->getDefaultMapper());
+      response->putHeader(Header::CONTENT_TYPE, "application/json");
+      return response;
+    }
+  unhandled_error:
+
     Status ret_status = Status::CODE_303;
     auto response = createResponse(ret_status, "");
     response->putHeader(Header::CONTENT_TYPE, "text/html");

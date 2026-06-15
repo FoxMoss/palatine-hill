@@ -21,6 +21,7 @@ export function Dashboard(
             explanation: String;
             id: Number;
             pitch_timestamp: String;
+            vote_count: Number;
           }>,
         ) => {
           // TODO calc points
@@ -29,7 +30,7 @@ export function Dashboard(
               ({
                 name: item.title,
                 author: item.name,
-                points: 0,
+                points: item.vote_count,
                 slackDiscusion: item.pitch_timestamp,
                 id: item.id
               }) as Post,

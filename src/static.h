@@ -39,22 +39,26 @@ class StaticController : public oatpp::web::server::api::ApiController {
   }
 
   ENDPOINT("GET", "/*", root,
-           REQUEST(std::shared_ptr<IncomingRequest>, request), QUERIES(QueryParams, queries)) {
+           REQUEST(std::shared_ptr<IncomingRequest>, request),
+           QUERIES(QueryParams, queries)) {
     std::string raw_url = request->getStartingLine().path.std_str();
     auto url = oatpp::network::Url::Parser::parseUrl(raw_url);
     std::string path = url.path;
     if (path.size() > 0) {
-      path.erase(0, 1); // erase leading /
+      path.erase(0, 1);  // erase leading /
     }
 
     Status ret_status = Status::CODE_200;
+
+    if (path == "error") {
+      ret_status = Status::CODE_300;
+    }
 
     if (path.ends_with("/") || path.empty()) {
       path.append("index.html");
     }
 
     auto file_path = std::filesystem::current_path() / "public" / path;
-
 
     if (file_path.extension() == "") {
       file_path += ".html";

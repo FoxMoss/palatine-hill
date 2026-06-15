@@ -4,7 +4,6 @@ import mermaid from "mermaid";
 import { PalatineHeader, Voting } from "./voting";
 import { PitchBox } from "./pitch";
 
-
 function IndividualVote(
   this: FC<
     {
@@ -19,7 +18,9 @@ function IndividualVote(
 ) {
   return (
     <div>
-      <PalatineHeader clickable={this.readonly ? false:true}>Determine an course of action</PalatineHeader>
+      <PalatineHeader clickable={this.readonly ? false : true}>
+        Determine an course of action
+      </PalatineHeader>
       <div class="content">
         <div class="content-box">
           <h2 class="lato-black">{this.objective}</h2>
@@ -76,7 +77,6 @@ IndividualVote.style = css`
   }
 `;
 
-
 export default function Homepage(this: FC<{}, {}>) {
   this.cx.mount = () => {
     mermaid.run();
@@ -90,14 +90,23 @@ export default function Homepage(this: FC<{}, {}>) {
         </div>
 
         <h3 class="lato-bold paragraph">
-          A HackClub competion about pitching and making interesting projects.
+          A software jam for teens about making projects people like!
         </h3>
 
         <h3 class="lato-bold paragraph">
-          What do we count as interesting? In short I like Hacker News's
-          definition: "anything that gratifies one's intellectual curiosity".
-          Which means you get to decide, if you find it piques your curiosity
-          then it has a place here.
+          As an event, I value making technically novel, or particularly
+          creative ideas, but ultimately winners are decided by your peers. As
+          more people participate and log more hours via{" "}
+          <a href="https://hackatime.hackclub.com/">Hackatime</a> the prize pool
+          expands, with a base prize pool being worth $500.
+        </h3>
+
+        <h3 class="lato-bold paragraph">
+          Where's the money coming from?{" "}
+          <a href="https://hackclub.com/">HackClub</a> is a 501(c)(3) nonprofit
+          supported by organizations like Github, AMD, OpenSauce, Girls Who
+          Code, MIT, and more. The goal is to get more teens into engineering,
+          and teens to get good at engineering.
         </h3>
 
         <div class="part-table-container">
@@ -106,34 +115,29 @@ export default function Homepage(this: FC<{}, {}>) {
             <div class="part-bg"></div>
             <div class="part-bg"></div>
             <div class="part-bg"></div>
-            <div class="part-bg"></div>
           </div>
           <div class="part-table lato-bold">
             <div class="part">
-              <div class="lato-black">Part 1. Sign up</div>
-              Any time until June 21st 2026
+              <div class="lato-black">Part 1. Pitch & Vote </div>
+              Any time until June 28th 2026
             </div>
             <div class="part">
-              <div class="lato-black">Part 2. Pitch & Vote </div>
-              June 21st 2026 until June 28th 2026
+              <div class="lato-black">Part 2. Make your project.</div>
+              When you pitch until July 13th 2026
             </div>
             <div class="part">
-              <div class="lato-black">Part 3. Make your project.</div>
-              When you pitch until July 18th 2026
+              <div class="lato-black">Part 3. Vote again!</div>
+              July 13th 2026 to July 15th 2026
             </div>
             <div class="part">
-              <div class="lato-black">Part 4. Vote again!</div>
-              July 18th 2026 to July 25th 2026
-            </div>
-            <div class="part">
-              <div class="lato-black">Part 5. Prizes and shop open.</div>
-              July 25th 2026 to August 25th 2026
+              <div class="lato-black">Part 4. Prizes are given out</div>
+              July 15th 2026 to August 18th 2026
             </div>
           </div>
         </div>
 
         <h3 class="lato-bold paragraph">
-          It's fairly simple, in the first week you'll pitch an idea.
+          It's fairly simple, in the first part you'll pitch an idea.
         </h3>
         <div class="embed">
           <div class="horizontal-line" />
@@ -202,8 +206,7 @@ export default function Homepage(this: FC<{}, {}>) {
         </h3>
 
         <h3 class="lato-bold paragraph">
-          Now is the time to make your project! You will be given 3 weeks with
-          little obligations to this program
+          Now is the time to make your project!
         </h3>
 
         <div class="embed">
@@ -252,16 +255,14 @@ export default function Homepage(this: FC<{}, {}>) {
           {`
 pie 
     "Pitch Score" : 30
-    "Project Score" : 65
-    "Bonuses! Including referals." : 5
+    "Project Score" : 70
 `}
         </pre>
         <br />
         <h3 class="lato-bold paragraph">
-          If this sounds interesting to you, RSVP to get notifed when it
-          launches.
+          Register, if this sounds interesting to you. If you don't have a HackClub account yet, you will need to make one.
         </h3>
-        <button class="rsvp">RSVP</button>
+        <button class="rsvp" on:click={() => window.location.assign("/auth/login")}>Register</button>
       </div>
     </div>
   );
@@ -333,7 +334,7 @@ Homepage.style = css`
     filter: url(#squiggle);
 
     display: grid;
-    grid-template-columns: 20% 20% 20% 20% auto;
+    grid-template-columns: 25% 25% 25% auto;
     gap: 4px;
     padding: 4px;
     grid-auto-flow: column;
@@ -348,7 +349,7 @@ Homepage.style = css`
 
   .part-table {
     display: grid;
-    grid-template-columns: 20% 20% 20% 20% auto;
+    grid-template-columns: 25% 25% 25% auto;
     justify-content: stretch;
     grid-auto-flow: column;
     gap: 4px;
