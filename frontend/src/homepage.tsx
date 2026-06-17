@@ -90,15 +90,13 @@ export default function Homepage(this: FC<{}, {}>) {
         </div>
 
         <h3 class="lato-bold paragraph">
-          A software jam for teens about making projects people like!
+          Palatine Hill is a software jam for teens about making creative, novel, and technical projects.
         </h3>
 
         <h3 class="lato-bold paragraph">
-          As an event, I value making technically novel, or particularly
-          creative ideas, but ultimately winners are decided by your peers. As
-          more people participate and log more hours via{" "}
+          As more people participate and log more hours via{" "}
           <a href="https://hackatime.hackclub.com/">Hackatime</a> the prize pool
-          expands, with a base prize pool being worth $500.
+          expands, each hour of work adding another $5 to the prize pool.
         </h3>
 
         <h3 class="lato-bold paragraph">
@@ -135,6 +133,8 @@ export default function Homepage(this: FC<{}, {}>) {
             </div>
           </div>
         </div>
+
+        <button class="rsvp" on:click={() => window.location.assign("/auth/login")}>Register an account!</button>
 
         <h3 class="lato-bold paragraph">
           It's fairly simple, in the first part you'll pitch an idea.
@@ -248,14 +248,13 @@ export default function Homepage(this: FC<{}, {}>) {
         </h3>
 
         <h3 class="lato-bold paragraph">
-          Your final points is weighted based on how you did in three
-          catagories.
+          Your final points is weighted based on how you did in two catagories.
         </h3>
-        <pre class="mermaid">
+        <pre class="mermaid lato-bold">
           {`
 pie 
-    "Pitch Score" : 30
-    "Project Score" : 70
+    "Pitch Score" : 20
+    "Project Score" : 80
 `}
         </pre>
         <br />

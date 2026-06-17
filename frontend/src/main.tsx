@@ -58,6 +58,21 @@ function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
         <title attr:innerText={title}></title>
         <meta property="og:title" content={title} />
         <link rel="icon" type="image/png" href="/logo.png" />
+
+          {/* Open Graph */}
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={"Palatine Hill is a software jam for teens about making creative, novel, and technical projects."} />
+          <meta property="og:type" content="website" />
+          <meta property="og:image" content="/logo.png" />
+          <meta property="og:image:width" content="630" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:site_name" content={"Palatine Hill"} />
+
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={title} />
+          <meta name="twitter:description" content={"Palatine Hill is a software jam for teens about making creative, novel, and technical projects."} />
+          <meta name="twitter:image" content={"/logo.png"} />
       </>
     </>
   );
