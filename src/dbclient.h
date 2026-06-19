@@ -93,6 +93,7 @@ class LocalDb : public oatpp::orm::DbClient {
     oatpp::orm::SchemaMigration migration(executor);
     migration.addFile(1, "migrations/init.sql");
     migration.addFile(2, "migrations/votes.sql");
+    migration.addFile(3, "migrations/nicknames.sql");
 
     try {
       migration.migrate();
@@ -131,17 +132,25 @@ class LocalDb : public oatpp::orm::DbClient {
   QUERY(get_my_votes, "SELECT * FROM votes WHERE slack_id=:slack_id",
         PARAM(oatpp::String, slack_id))
 
-  QUERY(get_account_from_access_token,
-        "SELECT * FROM access_tokens WHERE access_token=:access_token",
+QUERY(get_account_from_access_token,
+        "SELECT access_tokens.slack_id, access_tokens.access_token, access_tokens.hackatime_token, "
+        "COALESCE(nicknames.name, access_tokens.name) as name, access_tokens.last_updated "
+        "FROM access_tokens "
+        "LEFT JOIN nicknames ON nicknames.slack_id=access_tokens.slack_id "
+        "WHERE access_tokens.access_token=:access_token",
         PARAM(oatpp::String, access_token))
 
   QUERY(get_project_from_id, "SELECT * FROM pitches WHERE id=:id",
         PARAM(oatpp::Int32, id))
 
+  QUERY(set_nickname, "REPLACE INTO nicknames (slack_id, name, last_updated) VALUES (:slack_id, :name, unixepoch())",
+        PARAM(oatpp::String, slack_id), PARAM(oatpp::String, name))
+
   QUERY(get_pitches,
-        "SELECT name, pitches.*, COUNT(votes.id) as vote_count "
+        "SELECT COALESCE(nicknames.name, access_tokens.name) as name, pitches.*, COUNT(votes.id) as vote_count "
         "FROM pitches "
         "INNER JOIN access_tokens ON pitches.slack_id=access_tokens.slack_id "
+        "LEFT JOIN nicknames ON nicknames.slack_id=pitches.slack_id "
         "LEFT JOIN votes ON votes.project_id=pitches.id "
         "GROUP BY pitches.id")
 

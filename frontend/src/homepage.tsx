@@ -90,13 +90,16 @@ export default function Homepage(this: FC<{}, {}>) {
         </div>
 
         <h3 class="lato-bold paragraph">
-          Palatine Hill is a software jam for teens about making creative, novel, and technical projects.
+          Palatine Hill is a software jam for teens about making creative,
+          novel, and technical projects.
         </h3>
 
         <h3 class="lato-bold paragraph">
           As more people participate and log more hours via{" "}
           <a href="https://hackatime.hackclub.com/">Hackatime</a> the prize pool
-          expands, each hour of work adding another $5 to the prize pool.
+          expands, each hour of work adding another $5 to the value of the prize
+          pool. The actual items prizes will be decided later on after community
+          feedback!
         </h3>
 
         <h3 class="lato-bold paragraph">
@@ -104,7 +107,7 @@ export default function Homepage(this: FC<{}, {}>) {
           <a href="https://hackclub.com/">HackClub</a> is a 501(c)(3) nonprofit
           supported by organizations like Github, AMD, OpenSauce, Girls Who
           Code, MIT, and more. The goal is to get more teens into engineering,
-          and teens to get good at engineering.
+          and teens {"(<18)"} to get good at engineering.
         </h3>
 
         <div class="part-table-container">
@@ -134,7 +137,12 @@ export default function Homepage(this: FC<{}, {}>) {
           </div>
         </div>
 
-        <button class="rsvp" on:click={() => window.location.assign("/auth/login")}>Register an account!</button>
+        <button
+          class="rsvp"
+          on:click={() => window.location.assign("/auth/login")}
+        >
+          Register an account!
+        </button>
 
         <h3 class="lato-bold paragraph">
           It's fairly simple, in the first part you'll pitch an idea.
@@ -259,9 +267,15 @@ pie
         </pre>
         <br />
         <h3 class="lato-bold paragraph">
-          Register, if this sounds interesting to you. If you don't have a HackClub account yet, you will need to make one.
+          Register, if this sounds interesting to you. If you don't have a
+          HackClub account yet, you will need to make one.
         </h3>
-        <button class="rsvp" on:click={() => window.location.assign("/auth/login")}>Register</button>
+        <button
+          class="rsvp"
+          on:click={() => window.location.assign("/auth/login")}
+        >
+          Register
+        </button>
       </div>
     </div>
   );

@@ -32,6 +32,27 @@ export function PalatineHeader(
       </span>
 
       <div class="lato-regular title clickables">
+          <span
+          class="page-link lato-bold"
+          on:click={() => {
+            if (this.clickable) {
+              router.navigate("dashboard/nickname");
+            }
+          }}
+        >
+          nickname
+        </span>
+
+        <span
+          class="page-link lato-bold"
+          on:click={() => {
+            if (this.clickable) {
+              router.navigate("dashboard/faq");
+            }
+          }}
+        >
+          faq
+        </span>
         <span
           class="page-link lato-bold"
           on:click={() => {

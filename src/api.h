@@ -335,8 +335,11 @@ class ApiController : public oatpp::web::server::api::ApiController {
       std::string combined_name = std::format("{} {}", first_name, last_name);
 
       std::string return_body = std::format(
-          R"(<script>localStorage["access_token"]="{}"; localStorage["name"]="{}"; window.location.assign("/setup");</script>)",
-          out_parsed["access_token"].get<std::string>(), combined_name);
+          R"(<script>localStorage["access_token"]={}; localStorage["name"]={}; window.location.assign("/setup");</script>)",
+          nlohmann::json(nlohmann::json::string_t(
+                             out_parsed["access_token"].get<std::string>()))
+              .dump(),
+          nlohmann::json(nlohmann::json::string_t(combined_name)).dump());
 
       OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
       auto res = localdb->register_access_token(
@@ -401,6 +404,70 @@ class ApiController : public oatpp::web::server::api::ApiController {
     }
 
     return post_infos[0]->pitch_timestamp;
+  }
+
+  ENDPOINT("POST", "/api/v1/set_nickname", set_nickname,
+           REQUEST(std::shared_ptr<IncomingRequest>, request)) {
+    std::string error = "Unknown error";
+
+    {
+      auto submit_str =
+          "?" + request->getBodyDecoder()->decodeToString(
+                    request->getHeaders(), request->getBodyStream().get(),
+                    request->getConnection().get());
+      auto submit_params =
+          oatpp::network::Url::Parser::parseQueryParams(submit_str);
+
+      if (submit_params.get("access_token") == "") {
+        error = "Must have key \"access_token\"";
+        goto unhandled_error;
+      }
+      if (submit_params.get("nickname") == "") {
+        error = "Must have key \"nickname\"";
+        goto unhandled_error;
+      }
+
+      if (submit_params.get("nickname")->size() > 20) {
+        error = "Nickname was longer then 20 characters";
+        goto unhandled_error;
+      }
+
+      OATPP_COMPONENT(std::shared_ptr<LocalDb>, localdb);
+
+      auto slack_id =
+          grab_slack_id((std::string)submit_params.get("access_token"));
+      if (!slack_id.has_value()) {
+        error = slack_id.error();
+        goto unhandled_error;
+      }
+
+      auto nickname =
+          oatpp::encoding::Url::decode(submit_params.get("nickname"));
+
+      localdb->set_nickname(slack_id.value(), nickname);
+
+      std::string return_body = std::format(
+          R"(<script>localStorage["name"]={}; window.location.assign("/dashboard");</script>)",
+          nlohmann::json(nlohmann::json::string_t(nickname)).dump());
+
+      Status ret_status = Status::CODE_200;
+      auto response = createResponse(ret_status, return_body);
+
+      response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+      return response;
+    }
+
+  unhandled_error:
+    Status ret_status = Status::CODE_303;
+    auto response = createResponse(ret_status, "");
+    response->putHeader(Header::CONTENT_TYPE, "text/html");
+
+    response->putHeader(
+        "Location", std::format("/error?error={}",
+                                (std::string)oatpp::encoding::Url::encode(
+                                    error, oatpp::encoding::Url::Config())));
+    return response;
   }
 
   ENDPOINT("POST", "/api/v1/pitch_submit", pitch_submit,

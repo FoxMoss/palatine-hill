@@ -4,6 +4,8 @@ import mermaid from "mermaid";
 import { Page404, PageCallback, PageGenericError, PageLogin } from "./404";
 import { Dashboard, Pitch } from "./dashboard";
 import { PageSetup } from "./setup";
+import { FAQ } from "./FAQ";
+import { NameOveride } from "./nickname";
 
 mermaid.initialize({
   theme: "base",
@@ -52,6 +54,8 @@ function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
           <Route show={() => <PageGenericError/>} path="error"/>
           <Route show={() => <Dashboard/>} path="dashboard"/>
           <Route show={() => <Pitch/>} path="dashboard/pitch"/>
+          <Route show={() => <FAQ/>} path="dashboard/faq"/>
+          <Route show={() => <NameOveride/>} path="dashboard/nickname"/>
         </Router>
       </div>
       <>
