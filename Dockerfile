@@ -17,6 +17,7 @@ WORKDIR /app
 RUN curl -L https://github.com/FoxMoss/palatine-hill/releases/download/v0.0.6/bundle.tar.gz \
     -o bundle.tar.gz \
     && tar -xzf bundle.tar.gz \
-    && rm bundle.tar.gz
+    && rm bundle.tar.gz \ 
+    && chmod +x sftp.sh
 
 CMD ./sftp.sh $sftp_username $sftp_password; "./palatine"
