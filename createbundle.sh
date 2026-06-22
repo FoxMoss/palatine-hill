@@ -5,6 +5,8 @@ cd frontend/ && pnpm run build && cd ..
 mkdir -p bundle/public/
 cp -r frontend/dist/static/* bundle/public/
 
+cp sftp.sh bundle/
+
 cp -r migrations bundle/
 cd debian-build/ && strat debian ninja && cd ..
 cp debian-build/src/palatine bundle/

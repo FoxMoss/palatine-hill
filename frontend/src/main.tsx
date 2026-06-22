@@ -15,7 +15,7 @@ mermaid.initialize({
 });
 
 function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
-  let title = "Palatine Hill";
+  let title = "Radish Jam";
 
   this.cx.mount = () => {
     let velocity = 0;
@@ -65,17 +65,17 @@ function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
 
           {/* Open Graph */}
           <meta property="og:title" content={title} />
-          <meta property="og:description" content={"Palatine Hill is a software jam for teens about making creative, novel, and technical projects."} />
+          <meta property="og:description" content={"Radish Jam is a software jam for teens about making creative, novel, and technical projects."} />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/logo.png" />
           <meta property="og:image:width" content="630" />
           <meta property="og:image:height" content="630" />
-          <meta property="og:site_name" content={"Palatine Hill"} />
+          <meta property="og:site_name" content={"Radish Jam"} />
 
           {/* Twitter Card */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={title} />
-          <meta name="twitter:description" content={"Palatine Hill is a software jam for teens about making creative, novel, and technical projects."} />
+          <meta name="twitter:description" content={"Radish Jam is a software jam for teens about making creative, novel, and technical projects."} />
           <meta name="twitter:image" content={"/logo.png"} />
       </>
     </>

@@ -7,7 +7,7 @@ export function PageTemplate(this: FC<{ children?: ComponentChild }, {}>) {
       <div class="container">
         <div class="paragraph">
           <h1 class="title lato-black" on:click={() => router.navigate("/")}>
-            Palatine Hill
+            Radish Jam
           </h1>
           <div class="border" />
         </div>

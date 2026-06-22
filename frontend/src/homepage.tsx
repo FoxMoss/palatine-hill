@@ -1,6 +1,5 @@
 import { css, type FC } from "dreamland/core";
 import "highlight.js/styles/stackoverflow-light.css";
-import mermaid from "mermaid";
 import { PalatineHeader, Voting } from "./voting";
 import { PitchBox } from "./pitch";
 
@@ -78,37 +77,77 @@ IndividualVote.style = css`
 `;
 
 export default function Homepage(this: FC<{}, {}>) {
-  this.cx.mount = () => {
-    mermaid.run();
-  };
   return (
     <div>
       <div class="container">
         <div class="paragraph">
-          <h1 class="title lato-black">Palatine Hill</h1>
+          <h1 class="title lato-black">Radish Jam</h1>
           <div class="border" />
         </div>
 
-        <h3 class="lato-bold paragraph">
-          Palatine Hill is a software jam for teens about making creative,
-          novel, and technical projects.
+        <h3 class="lato-regular paragraph copy">
+          No entry fee. Full creative control. A global software jam for teens.
         </h3>
 
-        <h3 class="lato-bold paragraph">
-          As more people participate and log more hours via{" "}
-          <a href="https://hackatime.hackclub.com/">Hackatime</a> the prize pool
-          expands, each hour of work adding another $5 to the value of the prize
-          pool. The actual items prizes will be decided later on after community
-          feedback!
-        </h3>
+        <h3 class="lato-bold paragraph">The Prizes</h3>
 
-        <h3 class="lato-bold paragraph">
-          Where's the money coming from?{" "}
-          <a href="https://hackclub.com/">HackClub</a> is a 501(c)(3) nonprofit
-          supported by organizations like Github, AMD, OpenSauce, Girls Who
-          Code, MIT, and more. The goal is to get more teens into engineering,
-          and teens {"(<18)"} to get good at engineering.
-        </h3>
+        <div class="prizes lato-regular">
+          <span class="prize-label">First place:</span>
+          <span class="prize-item">
+            <img class="prize-img" src="/f16.webp" />
+            Framework Laptop 16
+          </span>
+          <span class="prize-label">Second place:</span>
+          <span class="prize-item">
+            <img class="prize-img" src="/f13.webp" />
+            Framework Laptop 13
+          </span>
+          <span class="prize-label">Third place:</span>
+          <span class="prize-item">
+            <img class="prize-img" src="/flipper.webp" />A Flipper Zero
+          </span>
+          <span class="prize-label">Best pitch:</span>
+          <span class="prize-item">
+            <img class="prize-img" src="/zero2.webp" />
+            Raspberry Pi Zero 2 W
+          </span>
+          <span class="prize-label">All participants!</span>
+          <span class="prize-item">
+            <img class="prize-img" src="/heart.webp" />A secret, but physical
+            token of my apretiation!
+          </span>
+        </div>
+        <div class="lato-regular small-text">
+          *This is given total hours shipped reaches 365. Prizes might be
+          adjusted for the budget.
+        </div>
+
+        <div class="lato-bold paragraph">What's a software jam?</div>
+        <div class="lato-regular paragraph">
+          A software jam is a competition in which developers battle it out to
+          make the coolest, most innovative projects with the winners being
+          decided apon by a vote.
+        </div>
+
+        <div class="lato-bold paragraph">Who can participate?</div>
+        <div class="lato-regular paragraph">
+          Anyone 18 or below, regardless of area of expertise and location.
+        </div>
+
+        <div class="lato-bold paragraph">Why participate?</div>
+        <div class="lato-regular paragraph">
+          This is your time to compete, to make something your proud of, to
+          create something that matters <span class="lato-bold">to you</span>. Why
+          spend your summer playing games, doomscrolling social feeds, when you
+          could be out there battling and honing your skill. When you care about
+          your work, others will too.
+        </div>
+
+        <div class="lato-bold paragraph">Rough outline</div>
+
+        <div class="lato-regular paragraph">
+          Running from June 22nd to July 18th.
+        </div>
 
         <div class="part-table-container">
           <div class="part-table-bg">
@@ -119,35 +158,45 @@ export default function Homepage(this: FC<{}, {}>) {
           </div>
           <div class="part-table lato-bold">
             <div class="part">
-              <div class="lato-black">Part 1. Pitch & Vote </div>
-              Any time until June 28th 2026
+              <div class="lato-black">Part 1. Pitch your ideas</div>
             </div>
             <div class="part">
-              <div class="lato-black">Part 2. Make your project.</div>
-              When you pitch until July 13th 2026
+              <div class="lato-black">Part 2. Make your project</div>
+              It <b>doesn't need to be approved</b>, just as long as you pitch
+              your idea. You can make it :{")"}
             </div>
             <div class="part">
-              <div class="lato-black">Part 3. Vote again!</div>
-              July 13th 2026 to July 15th 2026
+              <div class="lato-black">
+                Part 3. Vote on your favorite projects
+              </div>
             </div>
             <div class="part">
-              <div class="lato-black">Part 4. Prizes are given out</div>
-              July 15th 2026 to August 18th 2026
+              <div class="lato-black">
+                Part 4. Prizes are given out for the highest scoring projects
+              </div>
             </div>
           </div>
         </div>
 
-        <button
-          class="rsvp"
-          on:click={() => window.location.assign("/auth/login")}
-        >
-          Register an account!
-        </button>
+        <div class="rsvp-container">
+          <input placeholder="name@domain.tld" />
+          <button
+            class="rsvp"
+            on:click={() => window.location.assign("/auth/login")}
+          >
+            Register an account!
+          </button>
+        </div>
+        <h3 class="lato-bold paragraph">What's a pitch?</h3>
 
-        <h3 class="lato-bold paragraph">
-          It's fairly simple, in the first part you'll pitch an idea.
-        </h3>
-        <div class="embed">
+        <div class="lato-regular paragraph">
+          A pitch is a short summary of what you want to make, nothing set it
+          stone.{" "}
+          <div class="lato-bold">
+            Once you pitch you can get started right away.
+          </div>
+        </div>
+        <div class="embed constrain-width">
           <div class="horizontal-line" />
           <div class="embed-body">
             <PitchBox
@@ -161,9 +210,12 @@ export default function Homepage(this: FC<{}, {}>) {
           </div>
         </div>
 
-        <h3 class="lato-bold paragraph">
-          Then vote on pitches based on what you find interesting.
-        </h3>
+        <h3 class="lato-bold paragraph">Why are we voting on pitches?</h3>
+        <div class="lato-regular paragraph">
+          Pitches should be fun to talk about, vote on pitches you like, and
+          give feed back to each pitch's slack thread.
+        </div>
+
         <div class="embed">
           <div class="horizontal-line" />
           <div class="embed-body">
@@ -172,28 +224,28 @@ export default function Homepage(this: FC<{}, {}>) {
               posts={[
                 {
                   name: "Adding eval to Rust",
-                  points: 112,
+                  points: 110,
                   author: "William Daniel",
                   slackDiscusion: "about:blank",
                   id: 0,
                 },
                 {
                   name: "Doom in a PDF",
-                  points: 97,
+                  points: 90,
                   author: "vk6",
                   slackDiscusion: "about:blank",
                   id: 0,
                 },
                 {
                   name: "Hexecute: Launch apps by casting spells!",
-                  points: 85,
+                  points: 80,
                   author: "Andromeda",
                   slackDiscusion: "about:blank",
                   id: 0,
                 },
                 {
                   name: "Porting Celeste (2018) to the browser",
-                  points: 76,
+                  points: 70,
                   author: "r58",
                   slackDiscusion: "about:blank",
                   id: 0,
@@ -203,87 +255,43 @@ export default function Homepage(this: FC<{}, {}>) {
             />
           </div>
         </div>
-        <h3 class="lato-bold paragraph">
-          Every post will get added as a Slack thread for people to discuss,
-          follow, and post updates.
-        </h3>
 
-        <h3 class="lato-bold paragraph">
-          After the first week idea submissions will close, one day after that
-          voting will close and your points will be locked in.
-        </h3>
+        <div class="lato-bold paragraph">How do I start?</div>
 
-        <h3 class="lato-bold paragraph">
-          Now is the time to make your project!
-        </h3>
-
-        <div class="embed">
-          <div class="horizontal-line" />
-          <div class="embed-body">
-            <IndividualVote
-              readonly={true}
-              objective={'Was "Adding eval to Rust" shipped?'}
-              yes={23}
-              participants={112}
-              due={new Date(Date.now() + 24 * 60 * 60)}
-            />
-          </div>
+        <div class="lato-regular paragraph">
+          Register, if this sounds interesting to you. If you don't have a Hack
+          Club account yet, you will need to make one.
         </div>
 
-        <h3 class="lato-bold paragraph">
-          Failure is a part of learning, we get that. If you would like to pivot
-          at any time, you can call a vote. It's up to your voters to determine
-          if your pivot or ship is as cool or cooler then the original pitch.
-        </h3>
-
-        <div class="embed">
-          <div class="horizontal-line" />
-          <div class="embed-body">
-            <IndividualVote
-              readonly={true}
-              objective={
-                'Can "Adding eval to Rust" pivot to "Writing a Rust superset with classes"?'
-              }
-              yes={45}
-              participants={112}
-              due={new Date(Date.now() + 24 * 60 * 60)}
-            />
-          </div>
+        <div class="rsvp-container">
+          <input placeholder="name@domain.tld" />
+          <button
+            class="rsvp"
+            on:click={() => window.location.assign("/auth/login")}
+          >
+            Register an account!
+          </button>
         </div>
 
-        <h3 class="lato-bold paragraph">
-          In either case only a majority is needed for the decision to be made.
-        </h3>
-
-        <h3 class="lato-bold paragraph">
-          Your final points is weighted based on how you did in two catagories.
-        </h3>
-        <pre class="mermaid lato-bold">
-          {`
-pie 
-    "Pitch Score" : 20
-    "Project Score" : 80
-`}
-        </pre>
-        <br />
-        <h3 class="lato-bold paragraph">
-          Register, if this sounds interesting to you. If you don't have a
-          HackClub account yet, you will need to make one.
-        </h3>
-        <button
-          class="rsvp"
-          on:click={() => window.location.assign("/auth/login")}
-        >
-          Register
-        </button>
+        <h3 class="lato-bold paragraph">Where's the money coming from? </h3>
+        <div class="lato-regular paragraph">
+          <a href="https://hackclub.com/">HackClub</a> is a 501(c)(3) nonprofit
+          supported by organizations like Github, AMD, OpenSauce, Girls Who
+          Code, MIT, and more. The goal is to get more teens into engineering,
+          and teens {"(<18)"} to get good at engineering.
+        </div>
       </div>
     </div>
   );
 }
 Homepage.style = css`
   .rsvp {
-    width: 100%;
     height: 30px;
+  }
+
+  .rsvp-container {
+    display: flex;
+    justify-content: center;
   }
 
   .title {
@@ -382,4 +390,49 @@ Homepage.style = css`
   .mermaid > svg {
     max-height: 40vh;
   }
+  .prizes {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-auto-flow: row;
+    align-items: center;
+  }
+
+  .prize-label {
+    font-weight: bold;
+    font-size: larger;
+    padding: 8px;
+  }
+
+  .prize-item {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .prize-img {
+    display: block;
+    width: 20vh;
+    height: 20vh;
+    object-fit: contain;
+  }
+
+  .paragraph {
+    font-size: large;
+    margin-top:10px;
+    margin-bottom:10px;
+  }
+
+  .small-text {
+    font-size: small;
+    margin-bottom: 100px;
+  }
+
+  .copy {
+    margin-bottom: 100px;
+  }
+
 `;

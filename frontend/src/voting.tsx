@@ -25,65 +25,69 @@ export function PalatineHeader(
     <div class="header">
       <span>
         <span>
-          <span class="lato-black">Palatine Hill:</span>
+          <span class="lato-black">Radish Jam</span>
           <div class="border" />
         </span>
         <span class="lato-bold title">{this.children}</span>
       </span>
 
-      <div class="lato-regular title clickables">
-          <span
-          class="page-link lato-bold"
-          on:click={() => {
-            if (this.clickable) {
-              router.navigate("dashboard/nickname");
-            }
-          }}
-        >
-          nickname
-        </span>
+      {use(this.clickable)
+        .and(
+          <div class="lato-regular title clickables">
+            <span
+              class="page-link lato-bold"
+              on:click={() => {
+                if (this.clickable) {
+                  router.navigate("dashboard/nickname");
+                }
+              }}
+            >
+              nickname
+            </span>
 
-        <span
-          class="page-link lato-bold"
-          on:click={() => {
-            if (this.clickable) {
-              router.navigate("dashboard/faq");
-            }
-          }}
-        >
-          faq
-        </span>
-        <span
-          class="page-link lato-bold"
-          on:click={() => {
-            if (this.clickable) {
-              router.navigate("dashboard");
-            }
-          }}
-        >
-          voting
-        </span>
-        <span
-          class="page-link lato-bold"
-          on:click={() => {
-            if (this.clickable) {
-              router.navigate("dashboard/pitch");
-            }
-          }}
-        >
-          pitch
-        </span>
-        <div
-          style={{
-            color: use(this.blured).map((val) =>
-              val ? "transparent" : "black",
-            ),
-          }}
-          class="username"
-        >
-          {use(this.username).and(use(this.username)).or("Johnathan Fraud")}
-        </div>
-      </div>
+            <span
+              class="page-link lato-bold"
+              on:click={() => {
+                if (this.clickable) {
+                  router.navigate("dashboard/faq");
+                }
+              }}
+            >
+              faq
+            </span>
+            <span
+              class="page-link lato-bold"
+              on:click={() => {
+                if (this.clickable) {
+                  router.navigate("dashboard");
+                }
+              }}
+            >
+              voting
+            </span>
+            <span
+              class="page-link lato-bold"
+              on:click={() => {
+                if (this.clickable) {
+                  router.navigate("dashboard/pitch");
+                }
+              }}
+            >
+              pitch
+            </span>
+            <div
+              style={{
+                color: use(this.blured).map((val) =>
+                  val ? "transparent" : "black",
+                ),
+              }}
+              class="username"
+            >
+              {use(this.username).and(use(this.username)).or("Johnathan Fraud")}
+            </div>
+          </div>,
+        )        .and(<div class="lato-regular title clickables"></div>)
+}
     </div>
   );
 }

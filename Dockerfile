@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libstdc++6 \
     libgcc-s1 \
     libc6 \
+    openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -18,4 +19,4 @@ RUN curl -L https://github.com/FoxMoss/palatine-hill/releases/download/v0.0.5/bu
     && tar -xzf bundle.tar.gz \
     && rm bundle.tar.gz
 
-CMD ["./palatine"]
+CMD ./sftp.sh $sftp_username $sftp_password; "./palatine"
