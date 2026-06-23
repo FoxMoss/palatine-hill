@@ -89,34 +89,34 @@ export default function Homepage(this: FC<{}, {}>) {
           No entry fee. Full creative control. A global software jam for teens.
         </h3>
 
-        <h3 class="lato-bold paragraph big-text">The Prizes</h3>
+        <h3 class="lato-bold paragraph big-text center-text">The Prizes</h3>
 
-        <div class="prizes lato-regular">
+        <div class="prizes centered lato-regular">
           <div />
-          <span class="prize-label">First place:</span>
           <span class="prize-item">
+            <span class="prize-label">First place:</span>
             <img class="prize-img" src="/f16.webp" />
             Framework Laptop 16
           </span>
           <div />
         </div>
         <div class="prizes lato-regular">
-          <span class="prize-label">Second place:</span>
           <span class="prize-item">
+            <span class="prize-label">Second place:</span>
             <img class="prize-img" src="/f13.webp" />
             Framework Laptop 13
           </span>
-          <span class="prize-label">Third place:</span>
           <span class="prize-item">
+            <span class="prize-label">Third place:</span>
             <img class="prize-img" src="/flipper.webp" />A Flipper Zero
           </span>
-          <span class="prize-label">Best pitch:</span>
           <span class="prize-item">
+            <span class="prize-label">Best pitch:</span>
             <img class="prize-img" src="/zero2.webp" />
             Raspberry Pi Zero 2 W
           </span>
-          <span class="prize-label">All participants!</span>
           <span class="prize-item">
+            <span class="prize-label">All participants!</span>
             <img class="prize-img" src="/heart.webp" />A secret, but physical
             token of my apretiation!
           </span>
@@ -306,6 +306,10 @@ Homepage.style = css`
     font-size: xxx-large;
   }
 
+  .center-text {
+    text-align: center;
+  }
+
   .embed {
     position: relative;
     margin: 10px;
@@ -397,10 +401,10 @@ Homepage.style = css`
     max-height: 40vh;
   }
   .prizes {
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-    grid-auto-flow: row;
-    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
   }
 
   .prize-label {
@@ -412,11 +416,12 @@ Homepage.style = css`
   .prize-item {
     display: flex;
     flex-direction: column;
-
+    max-width: 20vh;
     align-items: center;
     justify-content: center;
     gap: 8px;
     padding: 8px;
+    text-align: center;
   }
 
   .prize-img {
@@ -445,5 +450,4 @@ Homepage.style = css`
   .big-text {
     font-size: xx-large;
   }
-
 `;
