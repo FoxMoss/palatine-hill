@@ -65,7 +65,7 @@ function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
 
           {/* Open Graph */}
           <meta property="og:title" content={title} />
-          <meta property="og:description" content={"Radish Jam is a software jam for teens about making creative, novel, and technical projects."} />
+          <meta property="og:description" content={"No entry fee. Full creative control. A global software jam for teens."} />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/logo.png" />
           <meta property="og:image:width" content="630" />
@@ -75,7 +75,7 @@ function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
           {/* Twitter Card */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={title} />
-          <meta name="twitter:description" content={"Radish Jam is a software jam for teens about making creative, novel, and technical projects."} />
+          <meta name="twitter:description" content={"No entry fee. Full creative control. A global software jam for teens."} />
           <meta name="twitter:image" content={"/logo.png"} />
       </>
     </>
