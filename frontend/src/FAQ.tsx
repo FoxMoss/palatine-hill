@@ -43,10 +43,6 @@ export function PitchExplainer(this: FC<{}, {}>) {
       <p>
         <img src="/likeexample.png" alt="like example" />
       </p>
-      <p>
-        After the deadline pitch submissions will be locked and you can stay
-        active in the slack while you work on your project!
-      </p>
     </>
   );
 }

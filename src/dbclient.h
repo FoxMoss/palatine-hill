@@ -9,6 +9,15 @@
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
+class VoteMessageTimestampDTO : public oatpp::DTO {
+  DTO_INIT(VoteMessageTimestampDTO, DTO)
+
+  DTO_FIELD_INFO(message_timestamp) {}
+  DTO_FIELD(String, message_timestamp);
+};
+#include OATPP_CODEGEN_END(DTO)
+
+#include OATPP_CODEGEN_BEGIN(DTO)
 class AccountInfoDto : public oatpp::DTO {
   DTO_INIT(AccountInfoDto, DTO)
 
@@ -129,12 +138,23 @@ class LocalDb : public oatpp::orm::DbClient {
         PARAM(oatpp::String, slack_id), PARAM(oatpp::Int32, project_id),
         PARAM(oatpp::String, message_timestamp))
 
+  QUERY(delete_vote,
+        "DELETE FROM votes WHERE slack_id=:slack_id AND project_id=:project_id",
+        PARAM(oatpp::String, slack_id), PARAM(oatpp::Int32, project_id))
+
   QUERY(get_my_votes, "SELECT * FROM votes WHERE slack_id=:slack_id",
         PARAM(oatpp::String, slack_id))
 
-QUERY(get_account_from_access_token,
-        "SELECT access_tokens.slack_id, access_tokens.access_token, access_tokens.hackatime_token, "
-        "COALESCE(nicknames.name, access_tokens.name) as name, access_tokens.last_updated "
+  QUERY(get_vote_ts,
+        "SELECT message_timestamp FROM votes WHERE slack_id=:slack_id AND "
+        "project_id=:project_id LIMIT 1",
+        PARAM(oatpp::String, slack_id), PARAM(oatpp::Int32, project_id))
+
+  QUERY(get_account_from_access_token,
+        "SELECT access_tokens.slack_id, access_tokens.access_token, "
+        "access_tokens.hackatime_token, "
+        "COALESCE(nicknames.name, access_tokens.name) as name, "
+        "access_tokens.last_updated "
         "FROM access_tokens "
         "LEFT JOIN nicknames ON nicknames.slack_id=access_tokens.slack_id "
         "WHERE access_tokens.access_token=:access_token",
@@ -143,11 +163,14 @@ QUERY(get_account_from_access_token,
   QUERY(get_project_from_id, "SELECT * FROM pitches WHERE id=:id",
         PARAM(oatpp::Int32, id))
 
-  QUERY(set_nickname, "REPLACE INTO nicknames (slack_id, name, last_updated) VALUES (:slack_id, :name, unixepoch())",
+  QUERY(set_nickname,
+        "REPLACE INTO nicknames (slack_id, name, last_updated) VALUES "
+        "(:slack_id, :name, unixepoch())",
         PARAM(oatpp::String, slack_id), PARAM(oatpp::String, name))
 
   QUERY(get_pitches,
-        "SELECT COALESCE(nicknames.name, access_tokens.name) as name, pitches.*, COUNT(votes.id) as vote_count "
+        "SELECT COALESCE(nicknames.name, access_tokens.name) as name, "
+        "pitches.*, COUNT(votes.id) as vote_count "
         "FROM pitches "
         "INNER JOIN access_tokens ON pitches.slack_id=access_tokens.slack_id "
         "LEFT JOIN nicknames ON nicknames.slack_id=pitches.slack_id "

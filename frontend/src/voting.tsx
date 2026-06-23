@@ -32,7 +32,7 @@ export function PalatineHeader(
       </span>
 
       {use(this.clickable)
-        .or(
+        .and(
           <div class="lato-regular title clickables">
             <span
               class="page-link lato-bold"
@@ -86,8 +86,8 @@ export function PalatineHeader(
               {use(this.username).and(use(this.username)).or("Johnathan Fraud")}
             </div>
           </div>,
-        )        .and(<div class="lato-regular title clickables"></div>)
-}
+        )
+        .or(<div class="lato-regular title clickables"></div>)}
     </div>
   );
 }
@@ -136,7 +136,7 @@ export function Voting(
       loading: boolean;
     },
     {
-      voted_projects: Number[];
+      voted_projects: { project_id: number; message_timestamp: string }[];
     }
   >,
 ) {
@@ -150,9 +150,14 @@ export function Voting(
           access_token: localStorage.getItem("access_token"),
         }),
       }).then((body) => {
-        body.json().then((json: { project_id: Number }[]) => {
-          this.voted_projects = json.map((project) => project.project_id);
-        });
+        body
+          .json()
+          .then((json: { project_id: number; message_timestamp: string }[]) => {
+            this.voted_projects = json.map((project) => ({
+              project_id: project.project_id,
+              message_timestamp: project.message_timestamp,
+            }));
+          });
       });
     }
   };
@@ -172,7 +177,9 @@ export function Voting(
           if (posts?.length != 0) {
             return posts?.map((post, index) => {
               const voted_on = use(this.voted_projects).map((projects) => {
-                return projects.includes(post.id ? (post.id as number) : -1);
+                return projects.some(
+                  (p) => p.project_id === (post.id ? (post.id as number) : -1),
+                );
               });
 
               return (
@@ -185,19 +192,19 @@ export function Voting(
                         val ? "initial" : "pointer",
                       ),
                     }}
-                    on:click={(e: MouseEvent) => {
-                      if (
-                        !this.readonly &&
-                        (e.target as HTMLDivElement).style.opacity != "0" &&
-                        !voted_on.value
-                      ) {
+                    on:click={() => {
+                      if (this.readonly) return;
+
+                      if (!voted_on.value) {
                         const xhr = new XMLHttpRequest();
                         xhr.open("POST", "/api/v1/upvote");
                         xhr.send(
                           `access_token=${encodeURIComponent(localStorage["access_token"])}&project_id=${post.id}`,
                         );
-                        this.voted_projects.push(post.id!);
-
+                        this.voted_projects.push({
+                          project_id: post.id!,
+                          message_timestamp: "",
+                        });
                         this.posts![index].points += 1;
                         this.posts = this.posts;
                       }
@@ -228,6 +235,32 @@ export function Voting(
                   </div>
                   <div class="lato-regular info">
                     {post.points * 10} points by {post.author}
+                    {/*voted_on
+                      .and(
+                        <span
+                          class="lato-regular unvote"
+                          on:click={() => {
+                            const vote = this.voted_projects.find(
+                              (v) => v.project_id === post.id,
+                            );
+                            if (!vote) return;
+                            const xhr = new XMLHttpRequest();
+                            xhr.open("POST", "/api/v1/unvote");
+                            xhr.send(
+                              `access_token=${encodeURIComponent(localStorage["access_token"])}&project_id=${post.id}`,
+                            );
+                            this.voted_projects = this.voted_projects.filter(
+                              (v) => v.project_id !== post.id,
+                            );
+                            this.posts![index].points -= 1;
+                            this.posts = this.posts;
+                          }}
+                        >
+                          unvote
+                        </span>,
+                      )
+                      .or(<span></span>)
+                    */}
                   </div>
                 </div>
               );
@@ -287,5 +320,11 @@ Voting.style = css`
   }
   .info {
     grid-area: info;
+  }
+  .unvote {
+    text-decoration: underline;
+    cursor: pointer;
+    opacity: 0.8;
+    margin-left: 20px;
   }
 `;

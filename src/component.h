@@ -14,7 +14,6 @@
 #include "oatpp/web/mime/ContentMappers.hpp"
 #include "oatpp/web/server/HttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"
-#include "slack.h"
 
 #define PORT 8080
 
@@ -39,9 +38,6 @@ class AppComponent {
         {"0.0.0.0", PORT, oatpp::network::Address::IP_4});
   }());
 
-  OATPP_CREATE_COMPONENT(std::shared_ptr<SlackApi>, slack_api)([] {
-    return std::make_shared<SlackApi>();
-  }());
 
   OATPP_CREATE_COMPONENT(std::shared_ptr<EnvReader>, env_reader)([] {
     return std::make_shared<EnvReader>(".env.json");
