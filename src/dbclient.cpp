@@ -20,9 +20,12 @@ LocalDb::template_creator_register_access_token() {
   map.insert({"name", oatpp::String::Class::getType()});
   return this->parseQueryTemplate(
       "register_access_token",
-      "REPLACE INTO access_tokens (slack_id, "
+       "INSERT INTO access_tokens (slack_id, "
       "access_token, name, last_updated) VALUES "
-      "(:slack_id, :access_token, :name, unixepoch());",
+      "(:slack_id, :access_token, :name, unixepoch()) "
+      "ON CONFLICT(slack_id) DO UPDATE SET "
+      "access_token=excluded.access_token, name=excluded.name, "
+      "last_updated=unixepoch();",
       map, prepare);
 }
 
