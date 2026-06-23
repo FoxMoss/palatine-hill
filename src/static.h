@@ -88,6 +88,8 @@ class StaticController : public oatpp::web::server::api::ApiController {
         mime = "text/javascript";
       } else if (file_path.extension() == ".png") {
         mime = "image/png";
+      } else if (file_path.extension() == ".webp") {
+        mime = "image/webp";
       } else if (file_path.extension() == ".html" ||
                  file_path.extension() == "") {
       } else {
