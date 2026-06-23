@@ -539,7 +539,7 @@ class ApiController : public oatpp::web::server::api::ApiController {
       auto thread_posted_timestamp = SlackApi::post_message(
           std::format("<@{}> Pitched: **{}**\n\nFollow the thread for updates.",
                       slack_id.value(), (std::string)title),
-          "C0B697HHCE6");
+          PALATINE_PROD ? "C0B697HHCE6" : "C0BCP9T7PMX");
 
       if (!thread_posted_timestamp.has_value()) {
         error = thread_posted_timestamp.error();
@@ -547,7 +547,8 @@ class ApiController : public oatpp::web::server::api::ApiController {
       }
 
       auto explanation_msg = SlackApi::post_message(
-          explanation, "C0B697HHCE6", thread_posted_timestamp.value());
+          explanation, PALATINE_PROD ? "C0B697HHCE6" : "C0BCP9T7PMX",
+          thread_posted_timestamp.value());
       if (!explanation_msg.has_value()) {
         error = explanation_msg.error();
         goto unhandled_error;
@@ -684,7 +685,8 @@ class ApiController : public oatpp::web::server::api::ApiController {
         goto unhandled_error;
       }
 
-      auto err = SlackApi::delete_message("C0B697HHCE6", ts.value());
+      auto err = SlackApi::delete_message(
+          PALATINE_PROD ? "C0B697HHCE6" : "C0BCP9T7PMX", ts.value());
       if (!err.has_value()) {
         error = err.error();
         goto unhandled_error;
@@ -746,9 +748,9 @@ class ApiController : public oatpp::web::server::api::ApiController {
         goto unhandled_error;
       }
 
-      auto like_msg =
-          SlackApi::post_message(std::format("<@{}> Liked", slack_id.value()),
-                                 "C0B697HHCE6", project_ts.value());
+      auto like_msg = SlackApi::post_message(
+          std::format("<@{}> Liked", slack_id.value()),
+          PALATINE_PROD ? "C0B697HHCE6" : "C0BCP9T7PMX", project_ts.value());
 
       if (!like_msg.has_value()) {
         error = like_msg.error();
