@@ -28,7 +28,7 @@ export function PitchExplainer(this: FC<{}, {}>) {
         ellison-taylor) on Slack so make sure its polished. Once posted
         it'll create a slack thread in{" "}
         <a href="https://hackclub.enterprise.slack.com/archives/C0B697HHCE6">
-          #palatine-hill-threads
+          #radish-jam-threads
         </a>
         . See the example below:
       </p>

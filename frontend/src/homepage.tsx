@@ -89,14 +89,18 @@ export default function Homepage(this: FC<{}, {}>) {
           No entry fee. Full creative control. A global software jam for teens.
         </h3>
 
-        <h3 class="lato-bold paragraph">The Prizes</h3>
+        <h3 class="lato-bold paragraph big-text">The Prizes</h3>
 
         <div class="prizes lato-regular">
+          <div />
           <span class="prize-label">First place:</span>
           <span class="prize-item">
             <img class="prize-img" src="/f16.webp" />
             Framework Laptop 16
           </span>
+          <div />
+        </div>
+        <div class="prizes lato-regular">
           <span class="prize-label">Second place:</span>
           <span class="prize-item">
             <img class="prize-img" src="/f13.webp" />
@@ -117,8 +121,10 @@ export default function Homepage(this: FC<{}, {}>) {
             token of my apretiation!
           </span>
         </div>
+        <div class="prizes lato-regular">
+        </div>
         <div class="lato-regular small-text">
-          *This is given total hours shipped reaches 365. Prizes might be
+          This is given total hours shipped reaches 365. Prizes might be
           adjusted for the budget.
         </div>
 
@@ -428,11 +434,16 @@ Homepage.style = css`
 
   .small-text {
     font-size: small;
+    margin-top: 50px;
     margin-bottom: 100px;
   }
 
   .copy {
     margin-bottom: 100px;
+  }
+
+  .big-text {
+    font-size: xx-large;
   }
 
 `;

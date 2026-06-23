@@ -32,7 +32,7 @@ export function PalatineHeader(
       </span>
 
       {use(this.clickable)
-        .and(
+        .or(
           <div class="lato-regular title clickables">
             <span
               class="page-link lato-bold"
@@ -227,7 +227,7 @@ export function Voting(
                     {post.name}
                   </div>
                   <div class="lato-regular info">
-                    {post.points} points by {post.author}
+                    {post.points * 10} points by {post.author}
                   </div>
                 </div>
               );
