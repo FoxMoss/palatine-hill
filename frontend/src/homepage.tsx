@@ -76,7 +76,14 @@ IndividualVote.style = css`
   }
 `;
 
-export default function Homepage(this: FC<{}, {}>) {
+export default function Homepage(this: FC<{}, { logged_in: boolean }>) {
+  this.logged_in = false;
+  this.cx.mount = () => {
+    if (!!localStorage["access_token"]) {
+      this.logged_in = true;
+    }
+  };
+
   return (
     <div>
       <div class="container">
@@ -121,12 +128,34 @@ export default function Homepage(this: FC<{}, {}>) {
             token of my apretiation!
           </span>
         </div>
-        <div class="prizes lato-regular">
-        </div>
+        <div class="prizes lato-regular"></div>
         <div class="lato-regular small-text">
           This is given total hours shipped reaches 365. Prizes might be
           adjusted for the budget.
         </div>
+
+        {use(this.logged_in)
+          .and(
+            <div class="rsvp-container">
+              <button
+                class="rsvp"
+                on:click={() => window.location.assign("/setup")}
+              >
+                Go to dashboard!
+              </button>
+            </div>,
+          )
+          .or(
+            <div class="rsvp-container">
+              <input placeholder="name@domain.tld" />
+              <button
+                class="rsvp"
+                on:click={() => window.location.assign("/auth/login")}
+              >
+                Register an account!
+              </button>
+            </div>,
+          )}
 
         <div class="lato-bold paragraph">What's a software jam?</div>
         <div class="lato-regular paragraph">
@@ -143,10 +172,10 @@ export default function Homepage(this: FC<{}, {}>) {
         <div class="lato-bold paragraph">Why participate?</div>
         <div class="lato-regular paragraph">
           This is your time to compete, to make something your proud of, to
-          create something that matters <span class="lato-bold">to you</span>. Why
-          spend your summer playing games, doomscrolling social feeds, when you
-          could be out there battling and honing your skill. When you care about
-          your work, others will too.
+          create something that matters <span class="lato-bold">to you</span>.
+          Why spend your summer playing games, doomscrolling social feeds, when
+          you could be out there battling and honing your skill. When you care
+          about your work, others will too.
         </div>
 
         <div class="lato-bold paragraph">Rough outline</div>
@@ -184,15 +213,6 @@ export default function Homepage(this: FC<{}, {}>) {
           </div>
         </div>
 
-        <div class="rsvp-container">
-          <input placeholder="name@domain.tld" />
-          <button
-            class="rsvp"
-            on:click={() => window.location.assign("/auth/login")}
-          >
-            Register an account!
-          </button>
-        </div>
         <h3 class="lato-bold paragraph">What's a pitch?</h3>
 
         <div class="lato-regular paragraph">
@@ -234,6 +254,7 @@ export default function Homepage(this: FC<{}, {}>) {
                   author: "William Daniel",
                   slackDiscusion: "about:blank",
                   id: 0,
+                  timeCreated: "",
                 },
                 {
                   name: "Doom in a PDF",
@@ -241,6 +262,7 @@ export default function Homepage(this: FC<{}, {}>) {
                   author: "vk6",
                   slackDiscusion: "about:blank",
                   id: 0,
+                  timeCreated: "",
                 },
                 {
                   name: "Hexecute: Launch apps by casting spells!",
@@ -248,6 +270,7 @@ export default function Homepage(this: FC<{}, {}>) {
                   author: "Andromeda",
                   slackDiscusion: "about:blank",
                   id: 0,
+                  timeCreated: "",
                 },
                 {
                   name: "Porting Celeste (2018) to the browser",
@@ -255,6 +278,7 @@ export default function Homepage(this: FC<{}, {}>) {
                   author: "r58",
                   slackDiscusion: "about:blank",
                   id: 0,
+                  timeCreated: "",
                 },
               ]}
               loading={false}
@@ -269,15 +293,28 @@ export default function Homepage(this: FC<{}, {}>) {
           Club account yet, you will need to make one.
         </div>
 
-        <div class="rsvp-container">
-          <input placeholder="name@domain.tld" />
-          <button
-            class="rsvp"
-            on:click={() => window.location.assign("/auth/login")}
-          >
-            Register an account!
-          </button>
-        </div>
+        {use(this.logged_in)
+          .and(
+            <div class="rsvp-container">
+              <button
+                class="rsvp"
+                on:click={() => window.location.assign("/setup")}
+              >
+                Go to dashboard!
+              </button>
+            </div>,
+          )
+          .or(
+            <div class="rsvp-container">
+              <input placeholder="name@domain.tld" />
+              <button
+                class="rsvp"
+                on:click={() => window.location.assign("/auth/login")}
+              >
+                Register an account!
+              </button>
+            </div>,
+          )}
 
         <h3 class="lato-bold paragraph">Where's the money coming from? </h3>
         <div class="lato-regular paragraph">
@@ -433,8 +470,8 @@ Homepage.style = css`
 
   .paragraph {
     font-size: large;
-    margin-top:10px;
-    margin-bottom:10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
   }
 
   .small-text {

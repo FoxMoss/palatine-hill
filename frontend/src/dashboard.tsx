@@ -26,6 +26,7 @@ export function Dashboard(
             id: Number;
             pitch_timestamp: String;
             vote_count: Number;
+            time_created: string;
           }>,
         ) => {
           this.posts = res.map(
@@ -36,6 +37,7 @@ export function Dashboard(
                 points: item.vote_count,
                 slackDiscusion: item.pitch_timestamp,
                 id: item.id,
+                timeCreated: item.time_created,
               }) as Post,
           );
         },

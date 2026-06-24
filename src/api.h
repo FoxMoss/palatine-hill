@@ -332,6 +332,12 @@ class ApiController : public oatpp::web::server::api::ApiController {
         goto error_response;
       }
 
+      if (!me_parsed["identity"]["verification_status"].is_string() || me_parsed["identity"]["verification_status"].get<std::string>() != "verified") {
+        out_json = "Hey! You need to still verify your identity on auth.hackclub.com to participate :) If it's pending you can check your status there.";
+
+        goto error_response;
+      }
+
       std::string combined_name = std::format("{} {}", first_name, last_name);
 
       std::string return_body = std::format(

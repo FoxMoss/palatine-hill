@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   background: #ead8c0;
@@ -107,4 +108,15 @@ body, html {
     margin-right: calc((100vw - 80vw) / 2);
     margin-top: 10px;
   }
+}
+
+.unvote {
+  text-decoration: underline;
+  cursor: pointer;
+  opacity: 0.5;
+  margin-left: 10px;
+}
+.ago {
+  opacity: 0.5;
+  margin-left: 10px;
 }
