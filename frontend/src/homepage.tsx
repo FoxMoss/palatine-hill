@@ -284,7 +284,7 @@ export default function Homepage(this: FC<{}, {}>) {
           <a href="https://hackclub.com/">HackClub</a> is a 501(c)(3) nonprofit
           supported by organizations like Github, AMD, OpenSauce, Girls Who
           Code, MIT, and more. The goal is to get more teens into engineering,
-          and teens {"(<18)"} to get good at engineering.
+          and teens {"(<19)"} to get good at engineering.
         </div>
       </div>
     </div>

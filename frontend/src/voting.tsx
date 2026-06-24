@@ -259,7 +259,7 @@ export function Voting(
                           unvote
                         </span>,
                       )
-                      .or(<span></span>)
+                      .or(<span class="unvote"></span>)
                     }
                   </div>
                 </div>
@@ -324,7 +324,7 @@ Voting.style = css`
   .unvote {
     text-decoration: underline;
     cursor: pointer;
-    opacity: 0.8;
+    opacity: 0.5;
     margin-left: 20px;
   }
 `;
