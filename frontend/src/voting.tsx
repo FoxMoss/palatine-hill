@@ -235,7 +235,7 @@ export function Voting(
                   </div>
                   <div class="lato-regular info">
                     {post.points * 10} points by {post.author}
-                    {/*voted_on
+                    {voted_on
                       .and(
                         <span
                           class="lato-regular unvote"
@@ -260,7 +260,7 @@ export function Voting(
                         </span>,
                       )
                       .or(<span></span>)
-                    */}
+                    }
                   </div>
                 </div>
               );

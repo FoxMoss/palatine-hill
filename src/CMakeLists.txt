@@ -9,8 +9,8 @@ include(FetchContent)
 set(OATPP_BUILD_TESTS OFF)
 FetchContent_Declare(
   oatpp
-  GIT_REPOSITORY https://github.com/oatpp/oatpp/
-  GIT_TAG "f83d648fd82dc222ef88aabbafb68efbd7d7bf50"
+  GIT_REPOSITORY https://github.com/FoxMoss/oatpp
+  GIT_TAG "3e3206b01c13c9fc4ccc8c8b8088a2b4481f8c40"
 )
 FetchContent_MakeAvailable(oatpp)
 
