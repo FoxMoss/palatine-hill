@@ -125,13 +125,14 @@ export default function Homepage(this: FC<{}, { logged_in: boolean }>) {
           <span class="prize-item">
             <span class="prize-label">All participants!</span>
             <img class="prize-img" src="/heart.webp" />A secret, but physical
-            token of my apretiation!
+            token of my appreciation!
           </span>
         </div>
         <div class="prizes lato-regular"></div>
         <div class="lato-regular small-text">
-          This is given total hours shipped reaches 365. Prizes might be
-          adjusted for the budget.
+          This is given total hours shipped reaches 365, each participant
+          contributes their time cumulatively. Prizes might be adjusted for the
+          budget.
         </div>
 
         {use(this.logged_in)
@@ -180,9 +181,7 @@ export default function Homepage(this: FC<{}, { logged_in: boolean }>) {
 
         <div class="lato-bold paragraph">Rough outline</div>
 
-        <div class="lato-regular paragraph">
-          Running from June 22nd to July 18th.
-        </div>
+        <div class="lato-regular paragraph">Running till July 10th 2026.</div>
 
         <div class="part-table-container">
           <div class="part-table-bg">

@@ -45,7 +45,7 @@ PageGenericError.style = css`
 export function PageLogin(this: FC<{}, {}>) {
   this.cx.mount = () => {
     window.location.assign(
-      `https://auth.hackclub.com/oauth/authorize?client_id=5f0bfe15fda9940ed93fd88aa4f0c3e0&redirect_uri=${encodeURIComponent(window.location.origin + "/auth/callback")}&response_type=code&scope=name+profile+verification_status+slack_id`,
+      `https://auth.hackclub.com/oauth/authorize?client_id=5f0bfe15fda9940ed93fd88aa4f0c3e0&redirect_uri=${encodeURIComponent(window.location.origin + "/auth/callback")}&response_type=code&scope=name+profile+verification_status+slack_id+basic_info`,
     );
   };
   return <PageTemplate>Redirecting to login...</PageTemplate>;
