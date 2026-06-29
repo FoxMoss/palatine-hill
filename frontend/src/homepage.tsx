@@ -94,6 +94,9 @@ export default function Homepage(this: FC<{}, { logged_in: boolean }>) {
 
         <h3 class="lato-regular paragraph copy">
           No entry fee. Full creative control. A global software jam for teens.
+          <div class="attribution lato-light">
+            {"with <3 from fox ellison-taylor at hackclub hq"}
+          </div>
         </h3>
 
         <h3 class="lato-bold paragraph big-text center-text">The Prizes</h3>

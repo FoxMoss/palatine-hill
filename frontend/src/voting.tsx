@@ -39,6 +39,17 @@ export function PalatineHeader(
               class="page-link lato-bold"
               on:click={() => {
                 if (this.clickable) {
+                  window.open("https://submit.hackclub.com/radish-jam")
+                }
+              }}
+            >
+              submit!
+            </span>
+
+            <span
+              class="page-link lato-bold"
+              on:click={() => {
+                if (this.clickable) {
                   router.navigate("dashboard/nickname");
                 }
               }}

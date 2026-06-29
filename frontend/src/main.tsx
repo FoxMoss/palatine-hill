@@ -17,31 +17,6 @@ mermaid.initialize({
 function App(this: FC<{ url?: string }, { el: ComponentInstance<any> }>) {
   let title = "Radish Jam";
 
-  this.cx.mount = () => {
-    let velocity = 0;
-    let last_scroll = window.scrollY;
-    document.addEventListener(
-        "scroll", (_: Event) => {
-          velocity += Math.abs(window.scrollY - last_scroll)/500;
-          velocity %= 2;
-          last_scroll = window.scrollY;
-        });
-
-    function frame(_ : Number) {
-      
-
-      document.getElementById("animatecomposite")
-          ?.setAttribute("k2", `${Math.abs(velocity-1)}`);
-      document.getElementById("animatecomposite")
-          ?.setAttribute("k3", `${1-Math.abs(velocity-1)}`);
-
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-
-    document.getElementById("seedanimate");
-  };
-
   return (
     <>
       <div id="app">
